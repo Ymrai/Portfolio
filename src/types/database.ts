@@ -255,6 +255,21 @@ export interface Database {
         };
         Relationships: [];
       };
+      settings: {
+        Row: {
+          id: string;
+          value: string;
+        };
+        Insert: {
+          id: string;
+          value: string;
+        };
+        Update: {
+          id?: string;
+          value?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

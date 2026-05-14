@@ -155,6 +155,31 @@ export async function getAdjacentMoreProjects(
   };
 }
 
+// ── Settings ─────────────────────────────────────────────────
+// All settings queries use the service role so RLS never blocks them.
+
+export async function getSetting(id: string): Promise<string | null> {
+  const supabase = await createServiceClient();
+  const { data } = await supabase
+    .from("settings")
+    .select("value")
+    .eq("id", id)
+    .single();
+  return data?.value ?? null;
+}
+
+export async function getAllSettings(): Promise<Record<string, string>> {
+  const supabase = await createServiceClient();
+  const { data } = await supabase.from("settings").select("id, value");
+  if (!data) return {};
+  return Object.fromEntries(data.map((r) => [r.id, r.value]));
+}
+
+export async function upsertSetting(id: string, value: string): Promise<void> {
+  const supabase = await createServiceClient();
+  await supabase.from("settings").upsert({ id, value });
+}
+
 export async function getAboutMe(): Promise<AboutMe | null> {
   const supabase = await createClient();
   const { data } = await supabase

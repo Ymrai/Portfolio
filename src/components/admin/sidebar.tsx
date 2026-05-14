@@ -9,6 +9,7 @@ import {
   User,
   Info,
   Palette,
+  Settings,
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const navItems = [
   { label: "About Me", href: "/admin/about", icon: User },
   { label: "Portfolio Info", href: "/admin/info", icon: Info },
   { label: "Design System", href: "/admin/design-system", icon: Palette },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
