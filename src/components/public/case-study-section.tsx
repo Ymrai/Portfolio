@@ -32,10 +32,17 @@ export function CaseStudySection({ label, section }: CaseStudySectionProps) {
       <h2 className="font-semibold uppercase tracking-widest" style={{ fontSize: "16px" }}>{label}</h2>
 
       {section.text && (
-        <div className="prose prose-neutral dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
+        <div className="space-y-3">
           {section.text.split("\n").map((para, i) =>
             para ? (
-              <p key={i} className="mb-3 last:mb-0">
+              <p
+                key={i}
+                style={{
+                  fontSize: "18px",
+                  lineHeight: "1.7",
+                  color: "var(--secondary-body)",
+                }}
+              >
                 {para}
               </p>
             ) : null

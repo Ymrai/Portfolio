@@ -71,7 +71,7 @@ export default async function MoreProjectPage({
           )}
           {project.description && (
             <p
-              className="text-xl leading-relaxed pt-1"
+              className="text-lg leading-relaxed pt-1"
               style={{ color: "var(--secondary-body)" }}
             >
               {renderInline(project.description)}

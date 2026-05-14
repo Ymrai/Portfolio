@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Nav } from "@/components/public/nav";
 import { Footer } from "@/components/public/footer";
+import { PageTransition } from "@/components/public/page-transition";
 import { getSetting } from "@/lib/supabase/queries";
 
 export default async function PublicLayout({
@@ -24,8 +25,10 @@ export default async function PublicLayout({
   return (
     <>
       <Nav />
-      <main className="flex-1 pt-20">{children}</main>
-      <Footer />
+      <PageTransition>
+        <main className="flex-1 pt-20">{children}</main>
+        <Footer />
+      </PageTransition>
     </>
   );
 }

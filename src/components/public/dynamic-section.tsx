@@ -41,7 +41,7 @@ function renderTextContent(content: string) {
               <li
                 key={j}
                 className="leading-relaxed"
-                style={{ fontSize: "20px", color: "var(--secondary-body)" }}
+                style={{ fontSize: "18px", color: "var(--secondary-body)" }}
               >
                 {renderInline(line)}
               </li>
@@ -51,7 +51,7 @@ function renderTextContent(content: string) {
           <p
             key={i}
             className="leading-relaxed"
-            style={{ fontSize: "20px", color: "var(--secondary-body)" }}
+            style={{ fontSize: "18px", color: "var(--secondary-body)" }}
           >
             {renderInline(run.text)}
           </p>
@@ -109,7 +109,7 @@ export function DynamicSectionRenderer({ section }: DynamicSectionProps) {
           {section.subtitle && (
             <p
               className="leading-snug"
-              style={{ fontSize: "20px", color: "var(--secondary-body)" }}
+              style={{ fontSize: "18px", color: "var(--secondary-body)" }}
             >
               {section.subtitle}
             </p>

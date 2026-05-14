@@ -30,7 +30,7 @@ export default async function AboutPage() {
         {/* Bio column */}
         <FadeIn className="md:col-span-3">
           {bioParagraphs.length > 0 ? (
-            <div className="space-y-4 leading-relaxed" style={{ fontSize: "20px" }}>
+            <div className="space-y-4 leading-relaxed" style={{ fontSize: "18px" }}>
               {bioParagraphs.map((para, i) => {
                 if (i === 0) {
                   const nameIdx = name ? para.indexOf(name) : -1;
@@ -39,8 +39,18 @@ export default async function AboutPage() {
                       {nameIdx >= 0 ? (
                         <>
                           {para.slice(0, nameIdx)}
-                          <span style={{ color: "#D6009D" }}>{name}</span>
-                          {para.slice(nameIdx + name.length)}
+                          {(() => {
+                            const afterName = para.slice(nameIdx + name.length);
+                            const hasComma = afterName.startsWith(",");
+                            return (
+                              <>
+                                <span style={{ color: "#D6009D" }}>
+                                  {name}{hasComma ? "," : ""}
+                                </span>
+                                {hasComma ? afterName.slice(1) : afterName}
+                              </>
+                            );
+                          })()}
                         </>
                       ) : (
                         para
@@ -56,7 +66,7 @@ export default async function AboutPage() {
               })}
             </div>
           ) : (
-            <p style={{ color: "var(--secondary-body)", fontSize: "20px" }} className="leading-relaxed">
+            <p style={{ color: "var(--secondary-body)", fontSize: "18px" }} className="leading-relaxed">
               Senior Product Designer with 10+ years of experience designing
               complex B2B products end to end.
             </p>
