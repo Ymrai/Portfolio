@@ -51,7 +51,7 @@ export default async function ProjectPage({
     { label: "Role",     value: project.role },
     { label: "Team",     value: project.team },
     { label: "Duration", value: project.duration },
-  ].filter((r) => r.value);
+  ].filter((r): r is { label: string; value: string } => Boolean(r.value));
 
   return (
     <article className="max-w-7xl mx-auto px-6 pt-20 pb-32">
