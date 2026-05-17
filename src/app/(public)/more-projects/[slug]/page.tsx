@@ -140,14 +140,14 @@ export default async function MoreProjectPage({
       )}
 
       {/* ── Bottom navigation ── */}
-      <div className="mt-16 md:mt-24 pt-8 border-t border-border/60 flex items-center justify-between gap-2 md:gap-4">
+      <div className="mt-16 md:mt-24 pt-8 border-t border-border/60 flex items-center justify-between gap-3">
         {adjacent.prev ? (
           <Link
             href={`/more-projects/${adjacent.prev.slug ?? adjacent.prev.id}`}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-3 py-2 md:px-5 md:py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-4 py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
           >
             <ArrowLeft size={15} className="shrink-0" />
-            <span className="hidden sm:inline truncate max-w-[160px]">{adjacent.prev.title}</span>
+            <span className="truncate max-w-[80px] sm:max-w-[180px]">{adjacent.prev.title}</span>
           </Link>
         ) : (
           <div />
@@ -158,9 +158,9 @@ export default async function MoreProjectPage({
         {adjacent.next ? (
           <Link
             href={`/more-projects/${adjacent.next.slug ?? adjacent.next.id}`}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-3 py-2 md:px-5 md:py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-4 py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
           >
-            <span className="hidden sm:inline truncate max-w-[160px]">{adjacent.next.title}</span>
+            <span className="truncate max-w-[80px] sm:max-w-[180px]">{adjacent.next.title}</span>
             <ArrowRight size={15} className="shrink-0" />
           </Link>
         ) : (
