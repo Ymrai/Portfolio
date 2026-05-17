@@ -19,16 +19,16 @@ export async function Footer() {
     <footer className="mt-auto" style={{ backgroundColor: FOOTER_BG }}>
       <div className="max-w-7xl mx-auto px-6 pt-14 pb-8">
         {/* Top block */}
-        <div className="flex items-start justify-between gap-8">
+        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between md:gap-8">
           <div>
             <h2 className="text-2xl font-bold" style={{ color: WHITE }}>
               {info?.footer_title || "Let's Connect"}
             </h2>
-            <p className="mt-2 text-base whitespace-nowrap" style={{ color: MUTED }}>
+            <p className="mt-2 text-base" style={{ color: MUTED }}>
               {info?.footer_subtitle || "Let's talk projects, collaborations or anything design!"}
             </p>
           </div>
-          <nav className="flex flex-col gap-2.5">
+          <nav className="flex flex-col gap-2.5 md:shrink-0">
             {navLinks.map((link) => (
               <Link
                 key={link.href}

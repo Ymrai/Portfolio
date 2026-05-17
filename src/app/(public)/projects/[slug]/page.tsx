@@ -54,16 +54,15 @@ export default async function ProjectPage({
   ].filter((r): r is { label: string; value: string } => Boolean(r.value));
 
   return (
-    <article className="max-w-7xl mx-auto px-6 pt-20 pb-32">
+    <article className="max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-20 pb-16 md:pb-32">
 
       {/* ── Hero image — full article width ── */}
       {project.hero_image_url && (
         <FadeIn>
           <div
-            className="w-full rounded-2xl overflow-hidden"
+            className="w-full rounded-2xl overflow-hidden p-4 sm:p-8 md:p-12"
             style={{
               backgroundColor: project.hero_bg_color || project.card_bg_color || "#F5F5F0",
-              padding: "48px",
             }}
           >
             <img
@@ -83,8 +82,8 @@ export default async function ProjectPage({
 
       {/* ── Title — text-centered across the full article width ── */}
       <FadeIn>
-        <div className="text-center" style={{ paddingTop: "96px", paddingBottom: "48px" }}>
-          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.1]">
+        <div className="text-center pt-10 pb-8 md:pt-24 md:pb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.1]">
             {(project.case_study_title || project.title)
               .split("\n")
               .map((line, i, arr) => (
@@ -170,27 +169,31 @@ export default async function ProjectPage({
       </div>
 
       {/* ── Bottom navigation — carousel ── */}
-      <div className="mt-24 pt-8 border-t border-border/60 flex items-center justify-between gap-4">
-        {adjacent.prev && (
+      <div className="mt-16 md:mt-24 pt-8 border-t border-border/60 flex items-center justify-between gap-2 md:gap-4">
+        {adjacent.prev ? (
           <Link
             href={`/projects/${adjacent.prev.slug}`}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-5 py-2.5 hover:border-foreground/40 transition-all duration-200"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-3 py-2 md:px-5 md:py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
           >
-            <ArrowLeft size={15} />
-            {adjacent.prev.title}
+            <ArrowLeft size={15} className="shrink-0" />
+            <span className="hidden sm:inline truncate max-w-[160px]">{adjacent.prev.title}</span>
           </Link>
+        ) : (
+          <div />
         )}
 
         <ScrollToTopButton />
 
-        {adjacent.next && (
+        {adjacent.next ? (
           <Link
             href={`/projects/${adjacent.next.slug}`}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-5 py-2.5 hover:border-foreground/40 transition-all duration-200"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-3 py-2 md:px-5 md:py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
           >
-            {adjacent.next.title}
-            <ArrowRight size={15} />
+            <span className="hidden sm:inline truncate max-w-[160px]">{adjacent.next.title}</span>
+            <ArrowRight size={15} className="shrink-0" />
           </Link>
+        ) : (
+          <div />
         )}
       </div>
 

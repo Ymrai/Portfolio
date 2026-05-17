@@ -13,7 +13,7 @@ export default async function AboutPage() {
   const bioParagraphs = about?.bio ? about.bio.split("\n").filter(Boolean) : [];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 pt-8 pb-32">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-16 md:pb-32">
       {/* Heading + subtitle sit above the bio/portrait grid */}
       <FadeIn>
         <div className="mb-10">
@@ -26,9 +26,9 @@ export default async function AboutPage() {
       </FadeIn>
 
       {/* Bio + portrait grid — portrait aligns with first line of bio */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-12 md:gap-16 items-start">
-        {/* Bio column */}
-        <FadeIn className="md:col-span-3">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-16 items-start">
+        {/* Bio column — second on mobile, first on desktop */}
+        <FadeIn className="md:col-span-3 order-2 md:order-1">
           {bioParagraphs.length > 0 ? (
             <div className="space-y-4 leading-relaxed" style={{ fontSize: "18px" }}>
               {bioParagraphs.map((para, i) => {
@@ -85,10 +85,10 @@ export default async function AboutPage() {
           )}
         </FadeIn>
 
-        {/* Portrait column — top-aligned with bio text */}
-        <FadeIn delay={0.15} className="md:col-span-2 flex justify-center md:justify-end">
+        {/* Portrait column — first on mobile, second on desktop */}
+        <FadeIn delay={0.15} className="md:col-span-2 order-1 md:order-2 flex justify-center md:justify-end">
           {info?.avatar_url ? (
-            <div className="w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden shrink-0 border-4 border-primary/10">
+            <div className="w-48 h-48 md:w-72 md:h-72 rounded-full overflow-hidden shrink-0 border-4 border-primary/10">
               <img
                 src={info.avatar_url}
                 alt={info.name}
@@ -96,7 +96,7 @@ export default async function AboutPage() {
               />
             </div>
           ) : (
-            <div className="w-64 h-64 md:w-72 md:h-72 rounded-full bg-muted shrink-0" />
+            <div className="w-48 h-48 md:w-72 md:h-72 rounded-full bg-muted shrink-0" />
           )}
         </FadeIn>
       </div>

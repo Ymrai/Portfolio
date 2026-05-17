@@ -18,17 +18,23 @@ export function SnapshotTable({ rows }: SnapshotTableProps) {
   const border = `1px solid ${borderColor}`;
 
   return (
-    <div className="mb-16" style={{ borderTop: border }}>
+    <div className="mb-10 md:mb-16" style={{ borderTop: border }}>
       {rows.map((row) => (
         <div
           key={row.label}
-          className="flex items-baseline justify-between py-5"
-          style={{ gap: "80px", borderBottom: border }}
+          className="flex items-baseline justify-between py-3 md:py-5 gap-4 md:gap-20"
+          style={{ borderBottom: border }}
         >
-          <span className="font-semibold text-foreground shrink-0" style={{ fontSize: "20px", minWidth: "160px" }}>
+          <span
+            className="font-semibold text-foreground shrink-0 text-sm md:text-xl"
+            style={{ minWidth: "100px" }}
+          >
             {row.label}
           </span>
-          <span className="text-right" style={{ fontSize: "20px", color: valueColor }}>
+          <span
+            className="text-right text-sm md:text-xl"
+            style={{ color: valueColor }}
+          >
             {row.value}
           </span>
         </div>

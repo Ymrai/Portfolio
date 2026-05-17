@@ -44,7 +44,7 @@ export default async function HomePage() {
       <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
         <div className="max-w-7xl w-full mx-auto flex flex-col items-center">
           <FadeIn>
-            <h1 className="text-[3.25rem] font-semibold leading-[1.3] tracking-tight text-center">
+            <h1 className="text-[2rem] sm:text-[2.5rem] md:text-[3.25rem] font-semibold leading-[1.3] tracking-tight text-center">
               {introLines.map((line, i) => (
                 <span key={i}>
                   {renderIntroLine(line)}
@@ -56,7 +56,7 @@ export default async function HomePage() {
 
           {info?.tagline && (
             <FadeIn delay={0.15}>
-              <p className="mt-6 text-center" style={{ fontSize: "22px" }}>
+              <p className="mt-6 text-center text-base md:text-[22px]">
                 {info.tagline}
               </p>
             </FadeIn>
@@ -70,7 +70,7 @@ export default async function HomePage() {
       </section>
 
       {/* Case Studies — no top padding; scroll arrow offsets by 112px to match other pages */}
-      <section id="case-studies" className="max-w-7xl mx-auto px-6 pb-32">
+      <section id="case-studies" className="max-w-7xl mx-auto px-4 md:px-6 pb-16 md:pb-32">
         <FadeIn>
           <div className="mb-12">
             <div className="w-10 h-[3px] bg-primary rounded-full mb-4" />
