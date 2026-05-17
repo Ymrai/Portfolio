@@ -6,7 +6,7 @@ import {
   getMoreProjectById,
   getAdjacentMoreProjects,
 } from "@/lib/supabase/queries";
-import { FadeIn, FadeInGroup, FadeInItem } from "@/components/public/fade-in";
+import { FadeIn } from "@/components/public/fade-in";
 import { DynamicSectionRenderer } from "@/components/public/dynamic-section";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { ScrollToTopButton } from "@/components/public/scroll-to-top";
@@ -51,7 +51,7 @@ export default async function MoreProjectPage({
   const sections = parseSections(project.sections);
 
   return (
-    <article className="max-w-7xl mx-auto px-6 pt-20 pb-32">
+    <article className="max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-20 pb-16 md:pb-32">
 
       {/* ── Header ── */}
       <FadeIn>
@@ -61,11 +61,11 @@ export default async function MoreProjectPage({
               {project.industry}
             </p>
           )}
-          <h1 className="font-extrabold tracking-tight leading-[1.1]" style={{ fontSize: "48px" }}>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.2]">
             {project.title}
           </h1>
           {project.kind && (
-            <p className="font-medium text-muted-foreground" style={{ fontSize: "20px" }}>
+            <p className="font-medium text-muted-foreground text-base md:text-xl">
               {project.kind}
             </p>
           )}
@@ -128,41 +128,43 @@ export default async function MoreProjectPage({
       )}
 
       {/* ── Dynamic sections ── */}
-      {/* Images inside DynamicSectionRenderer break out to full article width */}
+      {/* Each section has its own FadeIn so whileInView fires per-section */}
       {sections.length > 0 && (
-        <div className="max-w-5xl">
-          <FadeInGroup className="space-y-16">
-            {sections.map((section) => (
-              <FadeInItem key={section.id}>
-                <DynamicSectionRenderer section={section} />
-              </FadeInItem>
-            ))}
-          </FadeInGroup>
+        <div className="max-w-5xl space-y-16">
+          {sections.map((section) => (
+            <FadeIn key={section.id}>
+              <DynamicSectionRenderer section={section} />
+            </FadeIn>
+          ))}
         </div>
       )}
 
-      {/* ── Bottom navigation — always shown, wraps at ends ── */}
-      <div className="mt-24 pt-8 border-t border-border/60 flex items-center justify-between gap-4">
-        {adjacent.prev && (
+      {/* ── Bottom navigation ── */}
+      <div className="mt-16 md:mt-24 pt-8 border-t border-border/60 flex items-center justify-between gap-2 md:gap-4">
+        {adjacent.prev ? (
           <Link
             href={`/more-projects/${adjacent.prev.slug ?? adjacent.prev.id}`}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-5 py-2.5 hover:border-foreground/40 transition-all duration-200"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-3 py-2 md:px-5 md:py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
           >
-            <ArrowLeft size={15} />
-            {adjacent.prev.title}
+            <ArrowLeft size={15} className="shrink-0" />
+            <span className="hidden sm:inline truncate max-w-[160px]">{adjacent.prev.title}</span>
           </Link>
+        ) : (
+          <div />
         )}
 
         <ScrollToTopButton />
 
-        {adjacent.next && (
+        {adjacent.next ? (
           <Link
             href={`/more-projects/${adjacent.next.slug ?? adjacent.next.id}`}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-5 py-2.5 hover:border-foreground/40 transition-all duration-200"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border/60 rounded-full px-3 py-2 md:px-5 md:py-2.5 hover:border-foreground/40 transition-all duration-200 min-w-0"
           >
-            {adjacent.next.title}
-            <ArrowRight size={15} />
+            <span className="hidden sm:inline truncate max-w-[160px]">{adjacent.next.title}</span>
+            <ArrowRight size={15} className="shrink-0" />
           </Link>
+        ) : (
+          <div />
         )}
       </div>
     </article>

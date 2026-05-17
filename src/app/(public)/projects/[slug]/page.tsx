@@ -5,7 +5,7 @@ import { getProjectBySlug, getAdjacentProjects } from "@/lib/supabase/queries";
 import { CaseStudySection } from "@/components/public/case-study-section";
 import { DynamicSectionRenderer } from "@/components/public/dynamic-section";
 import { ImageGallery } from "@/components/public/image-gallery";
-import { FadeIn, FadeInGroup, FadeInItem } from "@/components/public/fade-in";
+import { FadeIn } from "@/components/public/fade-in";
 import { CASE_STUDY_SECTIONS, parseCaseStudy, parseSections } from "@/types";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { ScrollToTopButton } from "@/components/public/scroll-to-top";
@@ -83,7 +83,7 @@ export default async function ProjectPage({
       {/* ── Title — text-centered across the full article width ── */}
       <FadeIn>
         <div className="text-center pt-10 pb-8 md:pt-24 md:pb-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.1]">
+          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.2]">
             {(project.case_study_title || project.title)
               .split("\n")
               .map((line, i, arr) => (
@@ -137,30 +137,29 @@ export default async function ProjectPage({
 
       {/* ── Left-aligned container: all body content ── */}
       {/* Images inside DynamicSectionRenderer break out to full article width */}
-      <div className="max-w-5xl">
+      {/* Each section gets its own FadeIn so whileInView fires per-section
+          rather than waiting for 5% of the entire (potentially very tall) group */}
+      <div className="max-w-5xl space-y-16">
 
-        {/* Case study sections */}
-        <FadeInGroup className="space-y-16">
-          {useDynamic
-            ? dynamicSections.map((section) => (
-                <FadeInItem key={section.id}>
-                  <DynamicSectionRenderer section={section} />
-                </FadeInItem>
-              ))
-            : CASE_STUDY_SECTIONS.map(({ key, label }) => {
-                const section = caseStudy[key];
-                if (!section.text && section.images.length === 0) return null;
-                return (
-                  <FadeInItem key={key}>
-                    <CaseStudySection label={label} section={section} />
-                  </FadeInItem>
-                );
-              })}
-        </FadeInGroup>
+        {useDynamic
+          ? dynamicSections.map((section) => (
+              <FadeIn key={section.id}>
+                <DynamicSectionRenderer section={section} />
+              </FadeIn>
+            ))
+          : CASE_STUDY_SECTIONS.map(({ key, label }) => {
+              const section = caseStudy[key];
+              if (!section.text && section.images.length === 0) return null;
+              return (
+                <FadeIn key={key}>
+                  <CaseStudySection label={label} section={section} />
+                </FadeIn>
+              );
+            })}
 
         {/* Gallery */}
         {project.gallery_images.length > 0 && (
-          <FadeIn className="mt-16">
+          <FadeIn>
             <h2 className="text-xl font-bold mb-6">Gallery</h2>
             <ImageGallery images={project.gallery_images} title={project.title} />
           </FadeIn>
