@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   title: { default: "Yael Rosenberg", template: "%s | Yael Rosenberg" },
   description:
     "Senior Product Designer — turning complex systems into clear, intuitive experiences",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default async function RootLayout({
