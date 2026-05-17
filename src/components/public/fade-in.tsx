@@ -17,7 +17,7 @@ export function FadeIn({
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, amount: 0.05 }}
       transition={{ duration: 0.7, delay, ease }}
       className={className}
     >
@@ -37,8 +37,11 @@ export function FadeInGroup({
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-60px" }}
-      variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
+      viewport={{ once: true, amount: 0.05 }}
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.12 } },
+      }}
       className={className}
     >
       {children}
