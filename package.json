@@ -1,6 +1,7 @@
 {
-  "name": "portfolio",
-  "version": "0.1.0",
+  "name": "yael-rosenberg-portfolio",
+  "version": "1.0.0",
+  "description": "Personal portfolio and admin CMS for Yael Rosenberg — built with Next.js, Supabase, and Tailwind CSS",
   "private": true,
   "scripts": {
     "dev": "next dev",

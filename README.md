@@ -207,11 +207,14 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-# Visitor portfolio password (fallback if settings table is empty on first run)
-PORTFOLIO_PASSWORD=your-password
+# Site URL — used for redirects (http://localhost:3000 for local dev)
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-# Admin CMS login credentials
-ADMIN_USERNAME=admin
+# Visitor portfolio password — fallback if the settings table is empty on first run
+# Can be changed at runtime via /admin/settings without redeploying
+PORTFOLIO_PASSWORD=your-portfolio-password
+
+# Admin CMS password — protects the /admin area (password-only, no username)
 ADMIN_PASSWORD=your-admin-password
 ```
 
@@ -235,6 +238,8 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000). The dev server uses Turbopack by default.
 
 **Database setup:** Run each SQL file in `supabase/migrations/` in filename order via the Supabase Dashboard → SQL Editor. Each migration is additive and safe to re-run.
+
+**Image domains:** `next.config.ts` contains a hardcoded `remotePatterns` entry for the Supabase storage hostname. If you fork this project and use a different Supabase project, update the `hostname` value in `next.config.ts` to match your project's storage URL.
 
 ---
 
