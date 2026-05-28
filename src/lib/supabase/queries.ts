@@ -38,7 +38,9 @@ export async function getFeaturedProjects(): Promise<Project[]> {
 }
 
 export async function getAllProjects(): Promise<Project[]> {
-  const supabase = await createClient();
+  // Use service role so RLS doesn't filter out draft projects in the admin.
+  // Mirrors the pattern used by getAllMoreProjects().
+  const supabase = await createServiceClient();
   const { data } = await supabase
     .from("projects")
     .select("*")
