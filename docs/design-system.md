@@ -62,7 +62,7 @@ Every component uses auto-layout, variants/states, and token-bound visual proper
 **Molecules reuse atoms as nested instances:** `Card` footer → `Button`; `Project Card` CTA → `Pill Link`; `Nav` → `Theme Toggle`.
 
 **Component-specific notes:**
-- **Badge / Button destructive** — background is a 10% tint of `color/destructive` (Button hover 20%) with full-strength `destructive` text, readable in both modes.
+- **Badge / Button destructive** — background is a 10% tint of `color/destructive` (20% on hover, both modes) paired with a dedicated `destructive-text` color (**`#B91C1C`** light / **`#FCA5A5`** dark). This passes WCAG AA (**≥4.5:1**) for the text in both modes at rest and hover — full-strength `destructive` text previously failed (down to ~3.3:1). Backgrounds use `color/destructive`; text uses `color/destructive-text`.
 - **Project Card** — themes to dark like the More-Project Card: `bg-card` surface, `foreground` title, `secondary-body` description, `link` company label, `muted` image backing, `border/60`. Light card in light mode, dark card in dark mode.
 - **Nav** — `background @ 90%` + 12px backdrop blur (`bg-background/90` + `backdrop-blur-md`); bottom `border/30`.
 
