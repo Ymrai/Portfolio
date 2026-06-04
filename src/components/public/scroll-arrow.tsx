@@ -20,7 +20,7 @@ export function ScrollArrow({ targetId }: { targetId: string }) {
       animate={{ y: [0, 8, 0] }}
       transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
       style={{
-        color: "#D6009D",
+        color: "var(--primary)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -30,7 +30,7 @@ export function ScrollArrow({ targetId }: { targetId: string }) {
         padding: "8px",
       }}
     >
-      <ArrowDown size={48} weight="bold" color="#D6009D" />
+      <ArrowDown size={48} weight="bold" color="var(--primary)" />
     </motion.button>
   );
 }

@@ -44,7 +44,7 @@ export default async function AboutPage() {
                             const hasComma = afterName.startsWith(",");
                             return (
                               <>
-                                <span style={{ color: "#D6009D" }}>
+                                <span style={{ color: "var(--brand-text)" }}>
                                   {name}{hasComma ? "," : ""}
                                 </span>
                                 {hasComma ? afterName.slice(1) : afterName}
@@ -77,7 +77,7 @@ export default async function AboutPage() {
               href={info.resume_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-primary text-primary rounded-full px-6 py-2.5 text-sm font-medium hover:bg-primary hover:text-white transition-all duration-200 mt-6"
+              className="inline-flex items-center gap-2 border border-primary text-brand-text rounded-full px-6 py-2.5 text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-all duration-200 mt-6"
             >
               View Resume
               <ArrowUpRight size={15} />

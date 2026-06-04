@@ -33,9 +33,9 @@
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
-  /* Brand primary hardcoded — same in light and dark, no var() chain */
-  --color-primary: #D6009D;
-  --color-primary-foreground: #ffffff;
+  /* Brand primary — mode-aware: #D6009D in light, #FF47C4 in dark (see :root / .dark --primary) */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -49,6 +49,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
   --color-brand: #D6009D;
   --color-brand-foreground: #ffffff;
+  /* Accessible brand text — flips per theme so magenta text meets WCAG AA */
+  --color-brand-text: var(--brand-text);
 }
 
 :root {
@@ -87,6 +89,7 @@
   --sidebar-ring: #D6009D;
   --brand: #D6009D;
   --brand-foreground: #ffffff;
+  --brand-text: #D6009D; /* magenta text on light surfaces — 4.83:1 on white (AA) */
 }
 
 .dark {
@@ -97,8 +100,8 @@
   --card-foreground: #ffffff;
   --popover: #2E3548;
   --popover-foreground: #ffffff;
-  --primary: #D6009D;
-  --primary-foreground: #ffffff;
+  --primary: #FF47C4;
+  --primary-foreground: #202020;
   --secondary: #333B50;
   --secondary-foreground: #ffffff;
   --muted: #333B50;
@@ -108,22 +111,23 @@
   --destructive: #f87171;
   --border: #3D4560;
   --input: #3D4560;
-  --ring: #D6009D;
-  --chart-1: #D6009D;
+  --ring: #FF47C4;
+  --chart-1: #FF47C4;
   --chart-2: oklch(0.72 0.22 300);
   --chart-3: oklch(0.62 0.18 350);
   --chart-4: oklch(0.52 0.24 290);
   --chart-5: oklch(0.82 0.15 320);
   --sidebar: #2E3548;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #D6009D;
+  --sidebar-primary: #FF47C4;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #333B50;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #3D4560;
-  --sidebar-ring: #D6009D;
-  --brand: #D6009D;
+  --sidebar-ring: #FF47C4;
+  --brand: #FF47C4;
   --brand-foreground: #ffffff;
+  --brand-text: #FF47C4; /* single dark-mode brand magenta — 4.67:1 on page bg (AA); unified with --primary */
 }
 
 @layer base {

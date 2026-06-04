@@ -22,7 +22,7 @@ export function Hero({ info }: { info: PortfolioInfo }) {
           </Avatar>
         )}
         <div>
-          <p className="text-sm text-primary font-medium mb-0.5">Hi, I&apos;m</p>
+          <p className="text-sm text-brand-text font-medium mb-0.5">Hi, I&apos;m</p>
           <h1 className="text-4xl font-bold tracking-tight">{info.name}</h1>
         </div>
       </div>

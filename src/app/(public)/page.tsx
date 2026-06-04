@@ -28,7 +28,7 @@ export default async function HomePage() {
     return (
       <>
         {line.slice(0, nIdx)}
-        <span style={{ color: "#D6009D" }}>{name}{trailingComma}</span>
+        <span style={{ color: "var(--brand-text)" }}>{name}{trailingComma}</span>
         {after.slice(trailingComma.length)}
       </>
     );

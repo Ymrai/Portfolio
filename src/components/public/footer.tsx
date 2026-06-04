@@ -91,7 +91,7 @@ export async function Footer() {
       </div>
 
       {/* Brand bottom border */}
-      <div style={{ height: "8px", backgroundColor: "#D6009D" }} />
+      <div style={{ height: "8px", backgroundColor: "var(--primary)" }} />
     </footer>
   );
 }

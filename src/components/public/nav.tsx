@@ -36,7 +36,7 @@ export function Nav() {
         <a
           href="/"
           onClick={handleHomeClick}
-          className="font-extrabold text-xl tracking-tight text-primary hover:opacity-80 transition-opacity cursor-pointer"
+          className="font-extrabold text-xl tracking-tight text-brand-text hover:opacity-80 transition-opacity cursor-pointer"
         >
           YR.
         </a>
@@ -52,7 +52,7 @@ export function Nav() {
                 className={cn(
                   "text-[16px] font-medium transition-colors duration-200",
                   isActive(link.href)
-                    ? "text-primary"
+                    ? "text-brand-text"
                     : "text-[#757575] dark:text-[#A0A8BC] hover:text-foreground dark:hover:text-foreground"
                 )}
               >

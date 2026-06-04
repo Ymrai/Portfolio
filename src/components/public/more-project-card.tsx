@@ -37,7 +37,7 @@ export function MoreProjectCard({ project }: { project: MoreProject }) {
           {project.industry && (
             <p
               className="font-semibold uppercase tracking-widest"
-              style={{ fontSize: "12px", color: "#D6009D" }}
+              style={{ fontSize: "12px", color: "var(--brand-text)" }}
             >
               {project.industry}
             </p>
@@ -46,7 +46,7 @@ export function MoreProjectCard({ project }: { project: MoreProject }) {
             {project.title}
             {project.kind && (
               <>
-                <span style={{ color: "#D6009D", fontSize: "2rem", lineHeight: 0.8, fontWeight: 900 }}>{" · "}</span>
+                <span style={{ color: "var(--brand-text)", fontSize: "2rem", lineHeight: 0.8, fontWeight: 900 }}>{" · "}</span>
                 <span>{project.kind}</span>
               </>
             )}

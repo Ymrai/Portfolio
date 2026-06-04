@@ -109,7 +109,7 @@ export default async function ProjectPage({
                 href={project.live_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium border border-primary text-primary rounded-full px-5 py-2 hover:bg-primary hover:text-white transition-all duration-200"
+                className="text-sm font-medium border border-primary text-brand-text rounded-full px-5 py-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
               >
                 Live Site
               </a>
