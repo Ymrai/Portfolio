@@ -50,7 +50,7 @@ export async function Footer() {
         <div className="my-8" style={{ borderTop: `1px solid ${MUTED}33` }} />
 
         {/* Bottom block */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-base">
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 text-base">
           <p style={{ color: MUTED }}>
             Copyright {new Date().getFullYear()} by {info?.name ?? "Yael Rosenberg"}
           </p>
