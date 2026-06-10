@@ -1,6 +1,7 @@
 "use server";
 
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { z } from "zod";
 import type { Json } from "@/types/database";
 
@@ -75,6 +76,7 @@ export type ProjectFormData = z.infer<typeof projectSchema>;
 export async function createProject(
   data: ProjectFormData
 ): Promise<{ id?: string; error?: string }> {
+  await requireAdmin();
   const parsed = projectSchema.safeParse(data);
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -107,6 +109,7 @@ export async function createProject(
 export async function reorderProjects(
   items: { id: string; order_index: number }[]
 ): Promise<{ error?: string }> {
+  await requireAdmin();
   const supabase = await createServiceClient();
   const results = await Promise.all(
     items.map(({ id, order_index }) =>
@@ -121,6 +124,7 @@ export async function updateProject(
   id: string,
   data: ProjectFormData
 ): Promise<{ error?: string }> {
+  await requireAdmin();
   const parsed = projectSchema.safeParse(data);
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -138,6 +142,7 @@ export async function updateProject(
 }
 
 export async function deleteProject(id: string): Promise<{ error?: string }> {
+  await requireAdmin();
   const supabase = await createServiceClient();
   const { error } = await supabase.from("projects").delete().eq("id", id);
   return { error: error?.message };

@@ -1,11 +1,13 @@
 "use server";
 
 import { upsertSetting } from "@/lib/supabase/queries";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function updatePortfolioPassword(
   _prevState: { error?: string; success?: string } | null,
   formData: FormData
 ): Promise<{ error?: string; success?: string }> {
+  await requireAdmin();
   const newPassword = (formData.get("new_password") as string)?.trim();
   const confirmPassword = (formData.get("confirm_password") as string)?.trim();
 
@@ -21,6 +23,7 @@ export async function updateCookieDuration(
   _prevState: { error?: string; success?: string } | null,
   formData: FormData
 ): Promise<{ error?: string; success?: string }> {
+  await requireAdmin();
   const hours = formData.get("cookie_duration_hours") as string;
   const valid = ["1", "6", "12", "24", "48", "168"];
 

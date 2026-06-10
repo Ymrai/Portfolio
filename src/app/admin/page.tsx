@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderKanban, ListPlus, User, Info } from "lucide-react";
 import Link from "next/link";
+import { requireAdminPage } from "@/lib/auth/require-admin";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -32,7 +33,8 @@ const sections = [
   },
 ];
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  await requireAdminPage();
   return (
     <div className="space-y-6">
       <div>

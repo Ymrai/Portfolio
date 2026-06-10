@@ -1,10 +1,12 @@
 "use server";
 
 import { uploadFile, deleteFile, pathFromUrl } from "@/lib/supabase/storage";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function uploadImageAction(
   formData: FormData
 ): Promise<{ url: string; error?: string }> {
+  await requireAdmin();
   const file = formData.get("file") as File;
   const folder = (formData.get("folder") as string) || "misc";
 
@@ -25,6 +27,7 @@ export async function uploadImageAction(
 export async function uploadPdfAction(
   formData: FormData
 ): Promise<{ url: string; error?: string }> {
+  await requireAdmin();
   const file = formData.get("file") as File;
   const folder = (formData.get("folder") as string) || "resumes";
 
@@ -47,6 +50,7 @@ export async function uploadPdfAction(
 export async function deleteImageAction(
   url: string
 ): Promise<{ error?: string }> {
+  await requireAdmin();
   const path = pathFromUrl(url);
   if (!path) return { error: "Could not determine file path" };
   try {
