@@ -70,6 +70,21 @@ export async function getProjectById(id: string): Promise<Project | null> {
   return data;
 }
 
+// Admin version — uses service role to bypass RLS so drafts are accessible.
+// (Mirrors getMoreProjectByIdAdmin. The anon getProjectById above stays
+// published-only and is unchanged.)
+export async function getProjectByIdAdmin(
+  id: string
+): Promise<Project | null> {
+  const supabase = await createServiceClient();
+  const { data } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", id)
+    .single();
+  return data;
+}
+
 export async function getPublishedMoreProjects(): Promise<MoreProject[]> {
   const supabase = await createClient();
   const { data } = await supabase

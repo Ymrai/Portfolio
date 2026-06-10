@@ -4,6 +4,11 @@ _Snapshot for picking this back up (incl. a fresh Claude Code session). Bucket: 
 Storage `portfolio-assets`. Connection: `.env.local` → `NEXT_PUBLIC_SUPABASE_URL` +
 `SUPABASE_SERVICE_ROLE_KEY` (new-format `sb_secret_…`)._
 
+> **Related:** `docs/security-findings.md` records two things found while setting up the dev
+> environment — the draft-edit 404 fix (`getProjectByIdAdmin`) and the admin-auth weakness
+> (constant `admin_auth="true"` cookie + no per-action checks; prod proxy guard verified
+> active). Decide auth-fix-now vs. storage step-D-first.
+
 ## The problem
 - `portfolio-assets` was **over quota (~1.3 GB)**, full of duplicate/old images.
 - **Root cause:** uploads are immediate and client-side (`uploadFileClient`, `upsert:true`)
