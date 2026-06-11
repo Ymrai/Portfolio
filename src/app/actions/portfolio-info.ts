@@ -2,6 +2,7 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { reconcileFlatPrefixes, referencedPathsIn } from "@/lib/supabase/storage";
 import { z } from "zod";
 
 const schema = z.object({
@@ -40,5 +41,16 @@ export async function savePortfolioInfo(
     .update(parsed.data)
     .eq("id", 1);
 
-  return { error: error?.message };
+  if (error) return { error: error.message };
+
+  // Reconcile avatar / résumé folders (A′: editor no longer deletes on replace).
+  try {
+    await reconcileFlatPrefixes(["avatars", "resumes"], referencedPathsIn(parsed.data), {
+      dryRun: process.env.STORAGE_RECONCILE_DRYRUN === "true",
+    });
+  } catch (e) {
+    console.error("[reconcile] savePortfolioInfo (save still ok):", e);
+  }
+
+  return {};
 }

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Plus, X, Loader2, GripVertical } from "lucide-react";
-import { uploadFileClient, deleteFileClient } from "@/lib/supabase/upload";
+import { uploadFileClient } from "@/lib/supabase/upload";
 import { toast } from "sonner";
 
 interface GalleryUploadProps {
@@ -44,10 +44,9 @@ export function GalleryUpload({
     if (urls.length) onChange([...value, ...urls]);
   }
 
-  async function remove(idx: number) {
-    const url = value[idx];
+  function remove(idx: number) {
+    // Storage deletion is handled server-side on save (reconcile-on-save).
     onChange(value.filter((_, i) => i !== idx));
-    await deleteFileClient(url);
   }
 
   function onDragStart(idx: number) {

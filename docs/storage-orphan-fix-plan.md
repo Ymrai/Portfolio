@@ -1,218 +1,159 @@
-# Storage orphan fix — implementation plan (B + D + A′ + E)
+# Storage orphan-prevention fix — implementation plan (REVISED)
 
-Status: **proposal for review — no code changed.** Goal: stop the `portfolio-assets` bucket
-from re-accumulating orphans, without breaking the 136 currently-referenced files.
+Status: **proposal for review — NO code changed.** Revised after today's findings (dev repro,
+admin-auth work, prefix audit). Approach unchanged in spirit: **D + B + A′** (+ **E** later as a
+sweeper). Implement and validate entirely on dev first.
 
-## Root cause (recap)
-Uploads are immediate, client-side, and decoupled from saving (`uploadFileClient`,
-browser anon client, `upsert:true`). The DB row is written only on Save. So storage and
-DB are never reconciled → replaced/removed/abandoned uploads strand as orphans, and
-client-side deletes-before-save can break live references.
-
-## Design (the four pieces)
-- **D — Per-project keying.** Generate the project UUID up front so every draft upload
-  lands under `projects/<uuid>/…` (or `more-projects/<uuid>/…`), never the shared `new/`.
-- **B — Reconcile-on-save (server GC).** After a project row is written, list that
-  project's own prefix, diff against the URLs the saved row actually references, and delete
-  only the unreferenced extras. Service-role, behind a flag, dry-run first.
-- **A′ — Editing never deletes from storage.** Remove all client-side `deleteFileClient`
-  calls; deletion becomes the exclusive job of B (on save). Eliminates the pre-save
-  broken-reference risk and orphan-on-replace/remove in one move.
-- **E — Monthly safety-net sweeper.** Age-thresholded, dry-run-first script that deletes
-  anything the inline path misses (e.g. abandoned drafts, legacy `new/` leftovers).
-
-### Why this is safe for existing data
-- D changes only **new** drafts. Existing saved projects keep their stored URLs (including
-  legacy `new/` ones).
-- B deletes **only within a single project's own `projects/<uuid>/` prefix** and **only
-  files not in the referenced set**. Two hard guards: (1) never run GC when the prefix
-  resolves to the shared `projects/new` / `more-projects/new`; (2) never delete a path that
-  appears in the referenced set. → the 136 referenced files (incl. the 7 under `new/`) are
-  untouched.
-- Legacy projects whose files live under `new/`: editing/replacing now writes under their
-  real `<uuid>/` (the folder string already uses `project.id` for existing projects), B
-  cleans only the `<uuid>/` prefix, and the legacy `new/` referenced files stay referenced
-  and untouched. Any *replaced* legacy `new/` file becomes an orphan under shared `new/`
-  that B intentionally won't touch — left to E (age-based).
+## Branch note
+The auth work (D/B/A′ is unrelated to it) is **uncommitted on `admin-auth-hardening`**.
+Recommendation: **finish + commit the auth fix first, then do this on a separate branch**
+(e.g. `storage-orphan-prevention`) off `main`, so the two ship and roll back independently.
+If you'd rather keep momentum, we can continue on `admin-auth-hardening`, accepting that one
+branch then carries two unrelated fixes. (My recommendation: separate branch.)
 
 ---
 
-## File-by-file changes
+## 1. Approach (re-confirmed)
+- **D — per-project keying.** Generate the entity UUID up front so draft uploads land under the
+  entity's own `…/<uuid>/…` prefix, never the shared `…/new/…`.
+- **B — reconcile-on-save.** After a row is written, delete files under that entity's own
+  prefix(es) that the saved row no longer references. **Two hard guards: never operate on a bare
+  `new` prefix; never delete a referenced path** (enforced against the saved row *and* a global
+  referenced scan).
+- **A′ — the editor never deletes from storage.** All deletion happens server-side on save (B).
+  Removes the pre-save broken-reference risk and the orphan-on-replace/remove at once.
+- **E — monthly sweeper** (age-thresholded, dry-run-first): cleans anything inline logic can't —
+  notably **legacy `…/new/…` orphans created before D** (B intentionally won't touch shared
+  `new/`). Out of scope for this dev change; noted so the existing dev `new/` orphans are
+  expected to remain until E.
+
+---
+
+## 2. What changed since the original plan
+- **`requireAdmin()` now guards every mutating action.** B's reconcile runs *inside*
+  `createProject` / `updateProject` / `createMoreProject` / `updateMoreProject` — which are
+  already admin-guarded — so reconcile (a service-role delete) is admin-only by construction.
+  ✅ Confirmed compatible: reconcile runs after `await requireAdmin()` and after the DB write.
+- **Draft-edit fix is in** (`getProjectByIdAdmin`) — unrelated to storage, no interaction.
+- **Prefix audit (critical correction):** a more_project's files are split across **two**
+  prefixes (see §4). The original plan assumed one prefix per type — B must reconcile **both**
+  for more_projects.
+- **Legacy `CaseStudyEditor` is dead code** — defined but **not imported anywhere**, so no new
+  uploads ever go to `projects/<id>/case-study/…`. Nothing to change there. (Old prod data may
+  exist under that path; harmless, and B would clean it under `projects/<id>/` anyway.)
+
+---
+
+## 3. Resolved open questions (from the original plan)
+| Question | Answer (verified today) |
+|---|---|
+| Exact save flow / does create accept an id? | `project-form` → `createProject(formData())` returns `{id}`, then `router.push('/admin/projects/<id>')`. **createProject/createMoreProject do NOT accept an id today** (DB `gen_random_uuid()`); D adds an optional `id`. |
+| Where do more_project images live? | **cover** → `more-projects/<id>/cover`; **sections** → `projects/<id>/sections/<sectionId>` (shared `SectionsEditor` hardcodes `projects/`). No gallery uploader on more-project-form. |
+| Legacy case-study editor still used? | **No** — `CaseStudyEditor` is unreferenced dead code. |
+
+---
+
+## 4. The prefix map (what B must reconcile)
+| Entity (UUID) | Prefix(es) holding its files |
+|---|---|
+| **project** `P` | `projects/P/` (cover, hero, gallery, sections) — single prefix |
+| **more_project** `M` | `more-projects/M/` (cover) **and** `projects/M/` (sections) — **two prefixes** |
+
+UUIDs are unique per row, so `projects/M/` for a more_project contains only that more_project's
+section files (no project shares the UUID). Cross-entity collision is impossible; the global
+referenced cross-check (below) covers it regardless.
+
+---
+
+## 5. File-by-file changes
 
 ### D — pre-generate the UUID
-**`src/components/admin/project-form.tsx`**
-- On mount for a *new* project, generate `const draftId = crypto.randomUUID()` once
-  (stable across the editing session, e.g. `useState(() => crypto.randomUUID())`).
-- Replace the `project?.id ?? "new"` folder values (lines ~388 cover, ~402 hero, ~443
-  gallery) with `project?.id ?? draftId`.
-- Pass `projectId={project?.id ?? draftId}` to `<SectionsEditor>` (so its folders use the
-  uuid, not `"new"`).
-- On submit for a new project, pass `draftId` to `createProject` as the explicit id.
-
-**`src/components/admin/more-project-form.tsx`**
-- Same pattern: `draftId`, folder at ~260 (`cover`) and gallery, `projectId` to the editor,
-  pass `draftId` to `createMoreProject`.
-
-**`src/components/admin/sections-editor.tsx`**
-- No logic change needed — it already takes `projectId` and builds
-  `projects/${projectId ?? "new"}/…` (lines 536/581/596/605). With D, `projectId` is always
-  set, so `"new"` is never used. (Optionally drop the `?? "new"` fallback to fail loud.)
-
-**`src/components/admin/case-study-editor.tsx`** (legacy editor, line 47)
-- If still reachable, same treatment; otherwise note it as deprecated.
-
-**`src/app/actions/projects.ts` / `actions/more-projects.ts`**
-- Extend the create input/Zod schema to accept an optional `id`; on create, insert with the
-  provided id (`.insert({ id, ... })`). Confirm the table PK accepts an explicit UUID
-  (it does — `id` is a uuid PK; we just stop relying on the DB default for creates).
+- **`src/components/admin/project-form.tsx`**: for a new project, `const draftId = useState(() => crypto.randomUUID())[0]`. Use `project?.id ?? draftId` in the cover/hero/gallery folder strings (lines ~388/402/443) and `projectId={project?.id ?? draftId}` for `<SectionsEditor>` (line ~458). Pass `draftId` to `createProject`.
+- **`src/components/admin/more-project-form.tsx`**: same — `draftId`; cover folder (line ~260) and `projectId={project?.id ?? draftId}` for `<SectionsEditor>` (line ~277); pass `draftId` to `createMoreProject`.
+- **`src/app/actions/projects.ts` / `more-projects.ts`**: `createProject` / `createMoreProject` accept an optional `id` and `.insert({ id, … })` when provided. (more_projects keeps its slug-retry loop; id is constant across retries.)
 
 ### B — reconcile-on-save (server GC)
-**`src/lib/supabase/storage.ts`** (add helpers, service-role)
-- `listFilesUnder(prefix): Promise<string[]>` — recursive list of object paths under a
-  prefix (pagination), mirroring the analyze script.
-- `referencedPathsIn(payload): Set<string>` — regex-extract `portfolio-assets/<path>` from
-  a JSON-serialized row (covers direct columns + nested `sections`/`case_study`).
-- `reconcilePrefix(prefix, referenced, { dryRun }): { deleted, skipped }` —
-  list prefix → for each file not in `referenced`, delete (or log if dryRun).
-  **Guards inside:** refuse if `prefix` is empty / `projects/new` / `more-projects/new`;
-  never delete a path in `referenced`.
+- **`src/lib/supabase/storage.ts`** (service role; new helpers):
+  - `listFilesUnder(prefix): Promise<string[]>` — recursive list (pagination).
+  - `referencedPathsIn(value): Set<string>` — regex-extract `portfolio-assets/<path>` from a JSON-serialized row (covers cover/hero/gallery/sections/case_study).
+  - `reconcileEntityStorage(id, prefixes: string[], referenced: Set<string>, opts)` — for each `prefix` (e.g. `projects/<id>`, `more-projects/<id>`): list it, delete files **not in `referenced`**. **Guards:** throw/return early if `id` is falsy or `"new"`; never delete a path in `referenced`; only operate under `"<prefix>/"`. Honors a `dryRun` flag (log only). Wrapped so failures are caught/logged and **never block the save**.
+- **`src/app/actions/projects.ts`**: in `createProject` and `updateProject`, after a successful write, compute `referenced = referencedPathsIn(parsed.data) ∪ globalReferenced()` and call `reconcileEntityStorage(id, ["projects/"+id], referenced, {dryRun: STORAGE_RECONCILE_DRYRUN})`.
+- **`src/app/actions/more-projects.ts`**: same in `createMoreProject` / `updateMoreProject`, with `["more-projects/"+id, "projects/"+id]`.
+- `globalReferenced()` = union of referenced paths across all content rows (projects, more_projects, portfolio_info, about_me) — the belt-and-suspenders guard so a path referenced by *any* row is never deleted.
 
-**`src/app/actions/projects.ts`**
-- After a successful insert/update, call:
-  `await reconcilePrefix(`projects/${id}`, referencedPathsIn(savedRow), { dryRun: GC_DRY_RUN })`
-  guarded by `if (process.env.GC_ON_SAVE === "true")`.
-- For maximum safety, compute `referenced` as the **union of this row's URLs and a global
-  referenced scan** (optional; per-prefix is already safe because the prefix is exclusive to
-  one project after D).
+### A′ — editor never deletes
+- **`src/components/admin/image-upload.tsx`**: `handleRemove` → just `onChange("")` (drop `deleteFileClient`).
+- **`src/components/admin/gallery-upload.tsx`**: `remove()` → just update the array (drop `deleteFileClient`).
+- **`src/components/admin/pdf-upload.tsx`**: `handleRemove` → drop `deleteFileClient`.
+- "Replace" already doesn't delete (unchanged) — B now cleans the superseded file on save.
 
-**`src/app/actions/more-projects.ts`**
-- Same call with `more-projects/${id}` (and the project's own `projects/${id}` if it also
-  stores section images there — confirm folder usage during implementation).
-
-### A′ — editing no longer deletes from storage
-**`src/components/admin/image-upload.tsx`**
-- `handleRemove` (lines 50–53): drop the `deleteFileClient(value)` call — just
-  `onChange("")`. (Replace already doesn't delete; that's now correct, B handles it.)
-
-**`src/components/admin/gallery-upload.tsx`**
-- `remove` (lines 47–51): drop `deleteFileClient(url)` — just update the array.
-
-**`src/components/admin/pdf-upload.tsx`** (resume)
-- `handleRemove` (~56): drop `deleteFileClient`.
-
-> Net: the editor only *adds* to storage (uploads) and edits state. All *removal* happens
-> server-side on save via B. No deletion can happen before a save commits.
-
-### Optional — avatar / résumé (portfolio_info)
-The old-résumé orphan we found came from the same replace-without-delete in
-`pdf-upload`/`image-upload`. To cover it:
-- In the info/settings save action that writes `portfolio_info.avatar_url` / `resume_url`,
-  call `reconcilePrefix("avatars", referenced)` and `reconcilePrefix("resumes", referenced)`
-  where `referenced` = the saved avatar/resume URLs. (Confirm the exact action file during
-  implementation — likely `src/app/actions/*` for the info page.)
-
-### E — monthly safety-net sweeper
-**`scripts/sweep-orphans.mjs`** (new; based on `analyze-storage.mjs`)
-- List bucket, build referenced set from DB, compute orphans, **delete only orphans whose
-  `created_at` is older than `SWEEP_MIN_AGE_DAYS` (default 7)**, dry-run unless `--apply`.
-- Schedule monthly (Vercel Cron hitting a protected route, or a local/CI cron). Always keep
-  the age threshold so in-progress drafts are never swept.
-
-### Config / flags
-- `GC_ON_SAVE` (default `"false"` until verified) — master switch for B.
-- `GC_DRY_RUN` (default `"true"` on first deploy) — B logs intended deletions without
-  deleting.
-- `SWEEP_MIN_AGE_DAYS` (default `7`) for E.
+### Config
+- `STORAGE_RECONCILE_DRYRUN` (env): when `"true"`, B logs intended deletions but deletes nothing.
+  Default behavior: **off (deletes)** on dev for testing; **on (dry-run) for the first prod
+  deploy** to observe logs, then flip off. (This flag only ever makes B *safer* — it can't
+  fail open — so it's fine here, unlike the rejected auth flag.)
 
 ---
 
-## Test plan (run after each rollout step)
-Use a throwaway test project plus one real existing project; verify storage with the
-existing `analyze-storage.mjs` and the live site after each.
+## 6. The safety guarantee (most important)
+**B can never delete a still-referenced file.** A path is deleted only if **all** hold:
+1. it is under the saved entity's own `"<prefix>/<id>/"` (never a bare `new`/empty id), **and**
+2. it is **not** in `referencedPathsIn(saved row)`, **and**
+3. it is **not** in the **global** referenced set (any row), **and**
+4. `dryRun` is off.
 
-1. **Create project**: new draft → upload cover, hero, 1 section image, 2 gallery → Save.
-   - Expect: row has `projects/<uuid>/…` URLs; those files exist; **no extra files** under
-     the prefix; live detail page renders.
-2. **Edit (text only)**: change title/description → Save. Expect: zero storage changes.
-3. **Replace image**: replace the cover → Save.
-   - Expect: new file referenced and present; **old file gone** (deleted by B); live shows
-     new image; `analyze-storage` shows no orphan added.
-4. **Remove image**: delete a gallery image / a section block → Save.
-   - Expect: removed file gone after save; **before** save the file still exists (no pre-save
-     delete); if you remove then **navigate away without saving**, the file is still present
-     and still referenced → live image not broken.
-5. **Abandon draft**: new draft, upload images, leave without saving.
-   - Expect: files isolated under that draft's `projects/<uuid>/`, unreferenced; **not** in
-     shared `new/`; E will sweep them after the age threshold.
-6. **Legacy project (the 136)**: open an existing project whose hero is a `projects/new/…`
-   URL. Edit text → Save (expect new/ file untouched, still referenced). Replace its hero →
-   Save (new file under `projects/<uuid>/`, old uuid-prefixed versions GC'd, the legacy
-   `new/` file no longer referenced but **not deleted by B**). Verify the live page renders.
-7. **Regression sweep**: run `analyze-storage.mjs` → confirm `referenced (keep)` count never
-   drops unexpectedly and `referenced-but-missing` stays **0** after every test.
+Because any path present in the saved row (or any row) is in the referenced set and therefore
+excluded, a referenced file is structurally impossible to delete. Reconcile runs **after the DB
+write commits**, so "referenced" reflects persisted truth, and reconcile **failures are caught
+and logged, never block the save** (worst case: a harmless orphan lingers for E — never data
+loss). This is exactly what `scripts/dev-orphan-check.mjs` verifies: after a save, the
+**referenced (keep) count is unchanged** and only unreferenced extras disappear.
 
 ---
 
-## Impact on existing saved projects (the 136 referenced files)
-- **No migration of existing URLs.** Saved rows keep their current URLs, including the 7
-  legacy `new/` ones. Nothing rewrites them.
-- B never touches the shared `new/` prefix and never deletes a referenced path → the 136 are
-  safe by construction.
-- The only files B ever deletes are unreferenced objects under a *specific project's*
-  `projects/<uuid>/` (or `more-projects/<uuid>/`) prefix.
-- Verification gate: `analyze-storage.mjs` after enabling B must still show 136 referenced
-  and 0 referenced-but-missing.
-
----
-
-## Rollout order (each step independently verifiable & reversible)
-1. **D first (additive, no deletes).** Ship per-project keying. Verify tests 1–2 and that new
-   drafts land under `projects/<uuid>/` (not `new/`). Lowest risk; deletes nothing.
-2. **B in DRY-RUN.** Deploy reconcile-on-save with `GC_ON_SAVE=true`, `GC_DRY_RUN=true`.
-   Save a few projects; read logs to confirm it would delete **only** unreferenced
-   `<uuid>/`-prefixed files and **never** anything referenced or under `new/`. Re-run
-   `analyze-storage` to confirm nothing changed (dry run deletes nothing).
-3. **B enforce.** Flip `GC_DRY_RUN=false`. Run tests 3, 4, 6. Confirm orphans drop on replace
-   and the 136 stay intact.
-4. **A′.** Remove the client-side `deleteFileClient` calls. Re-run tests 3–4 (removal now
-   handled by B on save) and the pre-save-abandon case in test 4.
-5. **E.** Land the sweeper in dry-run, review its output for a cycle, then schedule with the
-   age threshold.
-6. (Optional) avatar/résumé reconcile, same dry-run→enforce gate.
-
-Hold at each step until its tests pass; do not stack steps.
-
----
+## 7. Rollout order
+1. **Dev:** implement D + B + A′ (this branch or `storage-orphan-prevention`). `STORAGE_RECONCILE_DRYRUN` unset (deletes). Run the §8 before/after test.
+2. **Preview (prod-like):** deploy a branch with `STORAGE_RECONCILE_DRYRUN=true` → exercise edits → read logs to confirm it would delete only unreferenced `<uuid>/`-prefixed files (never referenced, never `new/`).
+3. **Production:** flip `STORAGE_RECONCILE_DRYRUN=false`. Re-verify with the orphan check against prod.
+4. **E:** add the age-thresholded sweeper later to mop up legacy `new/` orphans.
 
 ## Rollback
-- **Per-step git revert.** Each step is a separate commit; revert restores prior behavior.
-- **Instant kill switch for B without a deploy:** set `GC_ON_SAVE=false` (or
-  `GC_DRY_RUN=true`) in the env — disables all save-time deletion immediately.
-- **A′ rollback:** re-adding the client deletes is a clean revert (only restores the old
-  behavior; no data loss).
-- **Data safety net:** `backup-storage/` (443 files, full pre-cleanup mirror) plus the
-  `backup-storage.mjs` script make every deletion recoverable; keep the backup until B+E have
-  run cleanly for a full cycle.
-- **Worst case (B deleted something wrong):** restore the affected paths from
-  `backup-storage/` via a small upload script (re-upload by path); URLs are deterministic so
-  references stay valid.
+- `git revert <commit>` → restores prior behavior (uploads to `new/`, no server GC, editor
+  deletes client-side). No DB/storage migration involved.
+- **Instant kill without redeploy:** set `STORAGE_RECONCILE_DRYRUN=true` — disables all save-time
+  deletion immediately (safe direction). D and A′ are inert without B and revert cleanly.
+- `backup-storage/` (prod mirror) remains the recovery net for prod.
 
 ---
 
-## Risks & mitigations
-| Risk | Mitigation |
-|---|---|
-| GC deletes a referenced file | Hard guard: never delete a path in the referenced set; per-`<uuid>` prefix only; dry-run gate; analyze-storage verification |
-| GC runs on shared `new/` | Guard refuses prefixes `projects/new` / `more-projects/new` |
-| Abandoned draft orphans | Isolated under their own `<uuid>/`; swept by E with age threshold |
-| Pre-save delete breaks live image | A′ removes all client-side deletes; deletion only on committed save |
-| Explicit-id insert collides | `crypto.randomUUID()`; id is a UUID PK |
-| Sweeper deletes an in-progress upload | `SWEEP_MIN_AGE_DAYS` threshold (≥7d) + dry-run review |
+## 8. Before/after test (dev) — exact steps with `scripts/dev-orphan-check.mjs`
 
-## Open questions to confirm during implementation
-- Exact action file that saves `portfolio_info` (avatar/résumé) for the optional reconcile.
-- Whether `more_projects` section images are stored under `more-projects/<id>/…` or
-  `projects/<id>/…` (confirm folder strings) so B reconciles the right prefix(es).
-- Whether `case-study-editor.tsx` (legacy) is still reachable from the admin UI.
-- Hosting for E's schedule (Vercel Cron vs external) and the auth on its trigger route.
+**Baseline (now, pre-fix):** `node scripts/dev-orphan-check.mjs` → **12 files / 6 referenced / 6 orphans** (today's repro). The 6 orphans include pre-D `projects/new/…` files that **B will not touch** (E's job).
+
+Because those legacy `new/` orphans persist, use one of these to get an unambiguous result:
+- **Option A (cleanest): reset the dev bucket first** (dev is disposable) — delete the dev test
+  project rows + their files so the check reads `Total = Referenced, Orphans 0`, then run the
+  fixed flow and assert **Orphans: 0** total. *(I'll script this read-confirm + delete only if
+  you approve — it's the one destructive step, and only on dev.)*
+- **Option B (non-destructive): measure the delta** — note the current 6 orphans are all under
+  `projects/new/…` (or the old test UUID); after the fixed flow, assert **no new orphans appear
+  under the new project's `projects/<newUUID>/` prefix**.
+
+**The fixed-flow test (the real proof):**
+1. Create a **new** project in the admin (D gives it a UUID up front).
+2. Upload a cover + hero + a section image; **replace the cover twice**; add 2 gallery images then **remove one**; Save (draft).
+3. `node scripts/dev-orphan-check.mjs` →
+   - **Expected: the new project contributes 0 orphans** — every file under `projects/<newUUID>/` is referenced; the replaced covers and the removed gallery image were deleted by B on save.
+   - Referenced (keep) count = exactly the project's live images.
+4. Re-open the saved project, replace the section image again, Save → re-run → still **0 new orphans** (B cleans the superseded file each save).
+5. Repeat for a **more_project** (cover replace + section replace) → assert **0 orphans** across **both** `more-projects/<id>/` and `projects/<id>/` (validates the two-prefix reconcile).
+
+**Pass criteria:** after the fixed flow, `dev-orphan-check` shows **0 orphans** attributable to
+the edited entity (and, if you reset first, **Orphans: 0** total), while the **referenced count
+never drops** for files that are still in use — proving the §6 guarantee in practice.
+
+---
+
+_No code written. Review, pick the branch (separate vs continue) and the test option (A reset
+vs B delta), and I'll implement on dev._
 </content>
