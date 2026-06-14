@@ -2,6 +2,7 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { reconcileEntityStorage, referencedPathsIn } from "@/lib/supabase/storage";
 import { z } from "zod";
 import type { Json } from "@/types/database";
 
@@ -74,7 +75,8 @@ const projectSchema = z.object({
 export type ProjectFormData = z.infer<typeof projectSchema>;
 
 export async function createProject(
-  data: ProjectFormData
+  data: ProjectFormData,
+  id?: string
 ): Promise<{ id?: string; error?: string }> {
   await requireAdmin();
   const parsed = projectSchema.safeParse(data);
@@ -96,6 +98,7 @@ export async function createProject(
     .from("projects")
     .insert({
       ...parsed.data,
+      ...(id ? { id } : {}),
       order_index: nextIndex,
       case_study: (parsed.data.case_study ?? null) as Json | null,
     })
@@ -103,6 +106,16 @@ export async function createProject(
     .single();
 
   if (error) return { error: error.message };
+
+  // Reconcile-on-save: drop any files under projects/<id>/ this save no longer references.
+  try {
+    await reconcileEntityStorage(row.id, ["projects"], referencedPathsIn(parsed.data), {
+      dryRun: process.env.STORAGE_RECONCILE_DRYRUN === "true",
+    });
+  } catch (e) {
+    console.error("[reconcile] createProject (save still ok):", e);
+  }
+
   return { id: row.id };
 }
 
@@ -138,7 +151,17 @@ export async function updateProject(
     })
     .eq("id", id);
 
-  return { error: error?.message };
+  if (error) return { error: error.message };
+
+  try {
+    await reconcileEntityStorage(id, ["projects"], referencedPathsIn(parsed.data), {
+      dryRun: process.env.STORAGE_RECONCILE_DRYRUN === "true",
+    });
+  } catch (e) {
+    console.error("[reconcile] updateProject (save still ok):", e);
+  }
+
+  return {};
 }
 
 export async function deleteProject(id: string): Promise<{ error?: string }> {

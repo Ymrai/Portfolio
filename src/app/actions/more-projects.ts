@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { reconcileEntityStorage, referencedPathsIn } from "@/lib/supabase/storage";
 import { z } from "zod";
 import type { Json } from "@/types/database";
 
@@ -70,7 +71,8 @@ export async function reorderMoreProjects(
 }
 
 export async function createMoreProject(
-  data: MoreProjectFormData
+  data: MoreProjectFormData,
+  id?: string
 ): Promise<{ id?: string; error?: string }> {
   await requireAdmin();
   const parsed = moreProjectSchema.safeParse(data);
@@ -98,6 +100,7 @@ export async function createMoreProject(
       .from("more_projects")
       .insert({
         ...parsed.data,
+        ...(id ? { id } : {}),
         slug,
         order_index: nextIndex,
         sections: (parsed.data.sections ?? null) as Json | null,
@@ -106,6 +109,17 @@ export async function createMoreProject(
       .single();
 
     if (!error) {
+      // Reconcile both prefixes a more-project uses: cover (more-projects/<id>) + sections (projects/<id>).
+      try {
+        await reconcileEntityStorage(
+          row.id,
+          ["more-projects", "projects"],
+          referencedPathsIn(parsed.data),
+          { dryRun: process.env.STORAGE_RECONCILE_DRYRUN === "true" }
+        );
+      } catch (e) {
+        console.error("[reconcile] createMoreProject (save still ok):", e);
+      }
       revalidatePath("/admin/more-projects");
       revalidatePath("/more-projects");
       return { id: row.id };
@@ -142,11 +156,24 @@ export async function updateMoreProject(
     })
     .eq("id", id);
 
+  if (error) return { error: error.message };
+
+  try {
+    await reconcileEntityStorage(
+      id,
+      ["more-projects", "projects"],
+      referencedPathsIn(parsed.data),
+      { dryRun: process.env.STORAGE_RECONCILE_DRYRUN === "true" }
+    );
+  } catch (e) {
+    console.error("[reconcile] updateMoreProject (save still ok):", e);
+  }
+
   revalidatePath("/admin/more-projects");
   revalidatePath(`/admin/more-projects/${id}`);
   revalidatePath("/more-projects");
   revalidatePath(`/more-projects/${id}`);
-  return { error: error?.message };
+  return {};
 }
 
 export async function deleteMoreProject(

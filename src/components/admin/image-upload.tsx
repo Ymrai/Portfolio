@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadFileClient, deleteFileClient } from "@/lib/supabase/upload";
+import { uploadFileClient } from "@/lib/supabase/upload";
 import { toast } from "sonner";
 
 interface ImageUploadProps {
@@ -47,8 +47,8 @@ export function ImageUpload({
     }
   }
 
-  async function handleRemove() {
-    if (value) await deleteFileClient(value);
+  function handleRemove() {
+    // Storage deletion is handled server-side on save (reconcile-on-save).
     onChange("");
   }
 

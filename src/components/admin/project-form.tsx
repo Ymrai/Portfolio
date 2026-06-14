@@ -47,6 +47,10 @@ export function ProjectForm({ project }: ProjectFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // Stable UUID for a NEW project so draft uploads land under projects/<id>/
+  // instead of the shared projects/new/ folder. Ignored when editing (uses real id).
+  const [draftId] = useState(() => crypto.randomUUID());
+  const entityId = project?.id ?? draftId;
 
   const [title, setTitle] = useState(project?.title ?? "");
   const [slug, setSlug] = useState(project?.slug ?? "");
@@ -121,7 +125,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
         if (error) { toast.error(error); return; }
         toast.success("Project saved");
       } else {
-        const { id, error } = await createProject(formData());
+        const { id, error } = await createProject(formData(), draftId);
         if (error || !id) { toast.error(error ?? "Failed to create"); return; }
         toast.success("Project created");
         router.push(`/admin/projects/${id}`);
@@ -385,7 +389,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
             <ImageUpload
               value={imageUrl}
               onChange={setImageUrl}
-              folder={`projects/${project?.id ?? "new"}/cover`}
+              folder={`projects/${entityId}/cover`}
               aspectRatio="video"
               label="Upload cover image"
             />
@@ -399,7 +403,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
             <ImageUpload
               value={heroImageUrl}
               onChange={setHeroImageUrl}
-              folder={`projects/${project?.id ?? "new"}/hero`}
+              folder={`projects/${entityId}/hero`}
               aspectRatio="video"
               label="Upload hero image"
             />
@@ -440,7 +444,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
             <GalleryUpload
               value={galleryImages}
               onChange={setGalleryImages}
-              folder={`projects/${project?.id ?? "new"}/gallery`}
+              folder={`projects/${entityId}/gallery`}
             />
           </div>
         </TabsContent>
@@ -455,7 +459,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
           <SectionsEditor
             value={sections}
             onChange={setSections}
-            projectId={project?.id}
+            projectId={entityId}
           />
         </TabsContent>
       </Tabs>

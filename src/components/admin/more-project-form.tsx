@@ -43,6 +43,10 @@ export function MoreProjectForm({ project }: MoreProjectFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // Stable UUID for a NEW more-project so draft uploads land under its own prefix
+  // (more-projects/<id>/cover + projects/<id>/sections) instead of the shared new/.
+  const [draftId] = useState(() => crypto.randomUUID());
+  const entityId = project?.id ?? draftId;
 
   const [title, setTitle] = useState(project?.title ?? "");
   const [slug, setSlug] = useState(project?.slug ?? "");
@@ -91,7 +95,7 @@ export function MoreProjectForm({ project }: MoreProjectFormProps) {
         if (error) { toast.error(error); return; }
         toast.success("Project saved");
       } else {
-        const { id, error } = await createMoreProject(formData());
+        const { id, error } = await createMoreProject(formData(), draftId);
         if (error || !id) { toast.error(error ?? "Failed to create"); return; }
         toast.success("Project created");
         router.push(`/admin/more-projects/${id}`);
@@ -257,7 +261,7 @@ export function MoreProjectForm({ project }: MoreProjectFormProps) {
             <ImageUpload
               value={coverImageUrl}
               onChange={setCoverImageUrl}
-              folder={`more-projects/${project?.id ?? "new"}/cover`}
+              folder={`more-projects/${entityId}/cover`}
               aspectRatio="video"
               label="Upload cover image"
             />
@@ -274,7 +278,7 @@ export function MoreProjectForm({ project }: MoreProjectFormProps) {
           <SectionsEditor
             value={sections}
             onChange={setSections}
-            projectId={project?.id}
+            projectId={entityId}
           />
         </TabsContent>
       </Tabs>

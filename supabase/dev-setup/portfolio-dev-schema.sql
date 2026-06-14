@@ -536,3 +536,11 @@ CREATE POLICY "Deny anon and authenticated access to settings"
 --    table. No functional change — the deny was already implicit.
 
 
+-- ============================================================================
+-- STEP 11  —  supabase/migrations/add_more_project_sections.sql
+-- ============================================================================
+-- Records the more_projects.sections column (exists on prod/dev; was drift).
+alter table more_projects
+  add column if not exists sections jsonb default null;
+
+
