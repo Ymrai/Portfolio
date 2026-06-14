@@ -40,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local storage backups (large — never commit)
+/backup-storage/
+
+# storage-cleanup working files (generated reports/lists; keep docs/ plan tracked)
+/deletion-list-*.txt
+/storage-cleanup-report.md

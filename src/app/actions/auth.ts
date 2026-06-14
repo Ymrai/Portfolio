@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createSessionToken } from "@/lib/auth/session";
 
 export async function loginAction(
   _prev: { error: string } | null,
@@ -14,7 +15,8 @@ export async function loginAction(
   }
 
   const cookieStore = await cookies();
-  cookieStore.set("admin_auth", "true", {
+  // Signed, unforgeable session token (HMAC of SESSION_SECRET) — not a constant.
+  cookieStore.set("admin_session", await createSessionToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -27,6 +29,7 @@ export async function loginAction(
 
 export async function logoutAction() {
   const cookieStore = await cookies();
-  cookieStore.delete("admin_auth");
+  cookieStore.delete("admin_session");
+  cookieStore.delete("admin_auth"); // clear the legacy constant cookie too
   redirect("/admin/login");
 }

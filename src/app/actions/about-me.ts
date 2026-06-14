@@ -1,6 +1,7 @@
 "use server";
 
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { z } from "zod";
 
 const experienceSchema = z.object({
@@ -29,6 +30,7 @@ const schema = z.object({
 export async function saveAboutMe(
   data: z.infer<typeof schema>
 ): Promise<{ error?: string }> {
+  await requireAdmin();
   const parsed = schema.safeParse(data);
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };

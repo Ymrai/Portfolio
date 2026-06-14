@@ -5,11 +5,13 @@ import { buttonVariants } from "@/components/ui/button";
 import { SortableMoreProjectList } from "@/components/admin/sortable-more-project-list";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { requireAdminPage } from "@/lib/auth/require-admin";
 
 export const metadata: Metadata = { title: "More Projects" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminMoreProjectsPage() {
+  await requireAdminPage();
   const projects = await getAllMoreProjects();
 
   return (

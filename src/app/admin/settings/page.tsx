@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { getAllSettings } from "@/lib/supabase/queries";
 import { SettingsForm } from "@/components/admin/settings-form";
+import { requireAdminPage } from "@/lib/auth/require-admin";
 
 export const metadata: Metadata = { title: "Settings" };
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
+  await requireAdminPage();
   const settings = await getAllSettings();
   const currentDuration = settings["cookie_duration_hours"] ?? "24";
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireAdminPage } from "@/lib/auth/require-admin";
 
 export const metadata: Metadata = { title: "Design System" };
 
@@ -80,7 +81,8 @@ function SpacingRow({ label, value, usage }: SpacingRowProps) {
   );
 }
 
-export default function DesignSystemPage() {
+export default async function DesignSystemPage() {
+  await requireAdminPage();
   return (
     <div className="max-w-3xl space-y-12 pb-16">
       <div>

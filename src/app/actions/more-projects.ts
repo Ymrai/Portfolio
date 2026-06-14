@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { z } from "zod";
 import type { Json } from "@/types/database";
 
@@ -57,6 +58,7 @@ export type MoreProjectFormData = z.infer<typeof moreProjectSchema>;
 export async function reorderMoreProjects(
   items: { id: string; order_index: number }[]
 ): Promise<{ error?: string }> {
+  await requireAdmin();
   const supabase = await createServiceClient();
   const results = await Promise.all(
     items.map(({ id, order_index }) =>
@@ -70,6 +72,7 @@ export async function reorderMoreProjects(
 export async function createMoreProject(
   data: MoreProjectFormData
 ): Promise<{ id?: string; error?: string }> {
+  await requireAdmin();
   const parsed = moreProjectSchema.safeParse(data);
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -125,6 +128,7 @@ export async function updateMoreProject(
   id: string,
   data: MoreProjectFormData
 ): Promise<{ error?: string }> {
+  await requireAdmin();
   const parsed = moreProjectSchema.safeParse(data);
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -148,6 +152,7 @@ export async function updateMoreProject(
 export async function deleteMoreProject(
   id: string
 ): Promise<{ error?: string }> {
+  await requireAdmin();
   const supabase = await createServiceClient();
   const { error } = await supabase.from("more_projects").delete().eq("id", id);
   revalidatePath("/admin/more-projects");
@@ -158,6 +163,7 @@ export async function deleteMoreProject(
 export async function getMoreProject(
   id: string
 ): Promise<{ project?: any; error?: string }> {
+  await requireAdmin();
   const supabase = await createServiceClient();
   const { data, error } = await supabase
     .from("more_projects")
