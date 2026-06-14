@@ -3,13 +3,25 @@
 Status: **plan for review — nothing pushed, no Vercel/prod changes made.** Covers both
 locally-committed branches, shipped **auth first, then storage**.
 
-> **WHERE WE ARE (session end, 2026-06-11):**
-> - `SESSION_SECRET` is **set in Vercel (Production + Preview)** ✅ — the lockout guard is in place.
-> - **Nothing pushed**; both feature branches are local-only; prod/`main` untouched.
-> - Local `.env.local` switched **back to production** (`moeninunhdbrklxbfprt`).
-> - **NEXT ACTION (next session):** `git push -u origin admin-auth-hardening` to create a Vercel
->   **Preview**, run the Phase-1 Preview gate checks (incognito redirect, forged-cookie rejection,
->   login), and only then merge to `main`. Do **not** merge before the Preview checks pass.
+> **WHERE WE ARE (paused, resume Sunday):**
+> - `SESSION_SECRET` is **set in Vercel (Production + Preview)** ✅ — lockout guard in place.
+> - **`admin-auth-hardening` pushed** to origin (`ea2ab22`) and its Vercel **Preview PASSED all 3
+>   Phase-1 checks**: (1) incognito `/admin` → redirect to `/admin/login`; (2) forged
+>   `Cookie: admin_session=true` → **rejected (307 → /admin/login)**; (3) real login with
+>   `ADMIN_PASSWORD` works. ✅
+> - Vercel **"Require Log In" Preview protection** was toggled **off** during testing and is now
+>   back **ON**. ✅
+> - **`storage-orphan-prevention` still local-only / unpushed.** `origin/main` unchanged at
+>   `2a6b200` — **nothing deployed to production; `main` untouched.**
+> - Local `.env.local` is on **production** (`moeninunhdbrklxbfprt`).
+>
+> **NEXT ACTION (Sunday):** merge `admin-auth-hardening` → `main` (this triggers the **production
+> deploy of auth**) → verify on prod (incognito redirect, forged cookie rejected, login, re-login
+> of your own session). Then **Phase 2**: push `storage-orphan-prevention`, deploy with
+> `STORAGE_RECONCILE_DRYRUN=true` (observe logs) before enforcing.
+>
+> **Still open (security):** **rotate the exposed GitHub token** that's embedded in the `origin`
+> remote URL (replace it with a fresh PAT / switch to SSH or the gh credential helper).
 
 ## Git state (read-only, verified)
 - Remote `origin` = `github.com/Ymrai/Portfolio` (URL embeds a **valid** token — push works).
