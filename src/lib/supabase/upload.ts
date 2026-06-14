@@ -11,9 +11,13 @@ export async function uploadFileClient(
   const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const path = `${folder}/${uniqueName}`;
 
+  // upsert:false → plain INSERT. The filename is unique per upload, so it can never
+  // collide; this avoids the storage UPDATE/upsert RLS path that the anon role is
+  // denied (anon may INSERT new objects but not upsert). Superseded files are removed
+  // server-side by reconcile-on-save.
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(path, file, { upsert: true, contentType: file.type });
+    .upload(path, file, { upsert: false, contentType: file.type });
 
   if (error) return { url: "", error: error.message };
 
