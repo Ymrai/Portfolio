@@ -1,9 +1,10 @@
 # Production rollout plan — admin-auth + storage-orphan-prevention
 
-Status: **SHIPPED — all phases merged to main and live in production (prod = a67ad17).**
+Status: **SHIPPED — all phases live in production; storage fully reconciled (0 orphans). `main` = b99f07f (last functional change a67ad17).**
 
 > **WHERE WE ARE (shipped — production complete):**
-> All three fixes are merged to `main` and live in production (current prod = `a67ad17`).
+> All fixes are merged to `main` and live in production. `main` = `b99f07f` (last functional
+> change `a67ad17`); local and `origin/main` are in sync.
 >
 > - **Auth hardening — SHIPPED** (merge #1 `3626f66`). Signed-session `admin_session` cookie
 >   (HMAC of `SESSION_SECRET`) + `requireAdmin()` on all mutating actions and admin pages;
@@ -14,25 +15,28 @@ Status: **SHIPPED — all phases merged to main and live in production (prod = a
 >   is denied. **Image replaces now succeed in production.**
 > - **Storage orphan prevention — SHIPPED + ENFORCED** (merge #2 `06d1648`). Pre-generated UUID
 >   (D) + reconcile-on-save (B) + editor-never-deletes (A′). `STORAGE_RECONCILE_DRYRUN=false`
->   in Vercel → reconcile actively deletes superseded files on save. **Verified on prod:** after
->   re-saving a project, bucket went **138 → 137**, **referenced stayed 136** (only the orphan
->   was removed; live images untouched).
-> - **Security — DONE.** GitHub PAT rotated; the `origin` remote URL no longer embeds a token;
->   `osxkeychain` credential helper verified.
+>   in Vercel → reconcile actively deletes superseded files on save. Verified on prod: re-saving
+>   a project removed its superseded cover (138 → 137), referenced unchanged at 136.
+> - **Final orphan cleanup — DONE.** The one legacy orphan
+>   `projects/new/cover/1777533149336-0xv9rym5838d.png` (under the shared `new/` prefix, which
+>   reconcile-on-save never touches) was deleted via a guarded one-off service-role remove.
+>   **Bucket is now 136 files / 136 referenced / 0 orphans — fully reconciled, none remaining.**
+> - **Security / GitHub auth — DONE.** PAT rotated and the `origin` remote URL cleaned (no embedded
+>   token). A direct `git push` then failed (no cached credential); re-authenticated via Cursor's
+>   GitHub sign-in (device code), and `b99f07f` pushed to `origin/main`. Local and remote `main`
+>   in sync.
 >
-> **Remaining (non-urgent):**
-> - One legacy orphan `projects/new/cover/1777533149336-0xv9rym5838d.png` under the shared `new/`
->   prefix — reconcile-on-save deliberately never touches `new/`, so clear it manually or via a
->   future age-thresholded sweeper (E).
-> - Optional: prune the 3 merged **remote** branches on GitHub (`admin-auth-hardening`,
->   `storage-orphan-prevention`, `fix/anon-upsert-upload`).
+> **Remaining (optional, cosmetic):**
+> - Prune the 3 merged **remote** branches on GitHub (`admin-auth-hardening`,
+>   `storage-orphan-prevention`, `fix/anon-upsert-upload`). No functional impact.
 
-## Git state (read-only, verified)
-- Remote `origin` = `github.com/Ymrai/Portfolio` (URL embeds a **valid** token — push works).
-- Remote has only `main` @ `2a6b200`. Local `main` is **ahead 1** (`a37df00`, unpushed).
-- `admin-auth-hardening` (`ea2ab22`) ahead 3; `storage-orphan-prevention` (`ceca4d3`) ahead 4
-  and **includes the auth commit** (it was branched from it).
-- Neither feature branch is on the remote yet (no upstream).
+## Git state (current)
+- Remote `origin` = `github.com/Ymrai/Portfolio` (no token embedded in the URL; auth via the
+  credential helper after the Cursor GitHub re-auth).
+- `main` = `b99f07f`; local `main` and `origin/main` are **in sync** (clean working tree).
+- The 3 feature branches (`admin-auth-hardening`, `storage-orphan-prevention`,
+  `fix/anon-upsert-upload`) are **merged into `main` and deleted locally**; only `main` remains
+  locally. Their **remote copies still exist on GitHub** and are optionally prunable (cosmetic).
 
 ## ⚠️ Two things to internalize before anything
 1. **SELF-LOCKOUT RISK (auth):** `SESSION_SECRET` **must be set in Vercel _Production_ before the
