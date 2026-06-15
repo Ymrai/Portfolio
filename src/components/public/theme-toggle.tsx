@@ -13,7 +13,7 @@ export function ThemeToggle() {
       size="icon"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       aria-label="Toggle theme"
-      className="text-foreground/60 hover:text-foreground"
+      className="rounded-full text-foreground/60 hover:text-foreground dark:hover:bg-muted"
     >
       {resolvedTheme === "dark" ? (
         <Moon size={18} />
