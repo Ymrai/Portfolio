@@ -26,17 +26,16 @@ Status: **SHIPPED — all phases live in production; storage fully reconciled (0
 >   GitHub sign-in (device code), and `b99f07f` pushed to `origin/main`. Local and remote `main`
 >   in sync.
 >
-> **Remaining (optional, cosmetic):**
-> - Prune the 3 merged **remote** branches on GitHub (`admin-auth-hardening`,
->   `storage-orphan-prevention`, `fix/anon-upsert-upload`). No functional impact.
+> **Remaining: none.** The 3 merged feature branches were deleted on GitHub, so only `main`
+> remains both locally and on `origin`. Repo is fully clean; rollout complete.
 
 ## Git state (current)
 - Remote `origin` = `github.com/Ymrai/Portfolio` (no token embedded in the URL; auth via the
   credential helper after the Cursor GitHub re-auth).
 - `main` = `b99f07f`; local `main` and `origin/main` are **in sync** (clean working tree).
 - The 3 feature branches (`admin-auth-hardening`, `storage-orphan-prevention`,
-  `fix/anon-upsert-upload`) are **merged into `main` and deleted locally**; only `main` remains
-  locally. Their **remote copies still exist on GitHub** and are optionally prunable (cosmetic).
+  `fix/anon-upsert-upload`) are **merged into `main` and deleted on both local and `origin`**.
+  Only `main` remains anywhere — repo fully clean.
 
 ## ⚠️ Two things to internalize before anything
 1. **SELF-LOCKOUT RISK (auth):** `SESSION_SECRET` **must be set in Vercel _Production_ before the
