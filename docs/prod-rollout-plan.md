@@ -1,27 +1,31 @@
 # Production rollout plan — admin-auth + storage-orphan-prevention
 
-Status: **plan for review — nothing pushed, no Vercel/prod changes made.** Covers both
-locally-committed branches, shipped **auth first, then storage**.
+Status: **SHIPPED — all phases merged to main and live in production (prod = a67ad17).**
 
-> **WHERE WE ARE (paused, resume Sunday):**
-> - `SESSION_SECRET` is **set in Vercel (Production + Preview)** ✅ — lockout guard in place.
-> - **`admin-auth-hardening` pushed** to origin (`ea2ab22`) and its Vercel **Preview PASSED all 3
->   Phase-1 checks**: (1) incognito `/admin` → redirect to `/admin/login`; (2) forged
->   `Cookie: admin_session=true` → **rejected (307 → /admin/login)**; (3) real login with
->   `ADMIN_PASSWORD` works. ✅
-> - Vercel **"Require Log In" Preview protection** was toggled **off** during testing and is now
->   back **ON**. ✅
-> - **`storage-orphan-prevention` still local-only / unpushed.** `origin/main` unchanged at
->   `2a6b200` — **nothing deployed to production; `main` untouched.**
-> - Local `.env.local` is on **production** (`moeninunhdbrklxbfprt`).
+> **WHERE WE ARE (shipped — production complete):**
+> All three fixes are merged to `main` and live in production (current prod = `a67ad17`).
 >
-> **NEXT ACTION (Sunday):** merge `admin-auth-hardening` → `main` (this triggers the **production
-> deploy of auth**) → verify on prod (incognito redirect, forged cookie rejected, login, re-login
-> of your own session). Then **Phase 2**: push `storage-orphan-prevention`, deploy with
-> `STORAGE_RECONCILE_DRYRUN=true` (observe logs) before enforcing.
+> - **Auth hardening — SHIPPED** (merge #1 `3626f66`). Signed-session `admin_session` cookie
+>   (HMAC of `SESSION_SECRET`) + `requireAdmin()` on all mutating actions and admin pages;
+>   forged constant cookie is rejected. Verified on prod (incognito redirect, forged cookie
+>   307→/admin/login, login, own-session re-login).
+> - **Anon-upload fix — SHIPPED** (merge #3 `a67ad17`). Browser uploader uses `upsert:false`
+>   (plain INSERT, unique filenames) to avoid the storage UPDATE/upsert RLS path the anon role
+>   is denied. **Image replaces now succeed in production.**
+> - **Storage orphan prevention — SHIPPED + ENFORCED** (merge #2 `06d1648`). Pre-generated UUID
+>   (D) + reconcile-on-save (B) + editor-never-deletes (A′). `STORAGE_RECONCILE_DRYRUN=false`
+>   in Vercel → reconcile actively deletes superseded files on save. **Verified on prod:** after
+>   re-saving a project, bucket went **138 → 137**, **referenced stayed 136** (only the orphan
+>   was removed; live images untouched).
+> - **Security — DONE.** GitHub PAT rotated; the `origin` remote URL no longer embeds a token;
+>   `osxkeychain` credential helper verified.
 >
-> **Still open (security):** **rotate the exposed GitHub token** that's embedded in the `origin`
-> remote URL (replace it with a fresh PAT / switch to SSH or the gh credential helper).
+> **Remaining (non-urgent):**
+> - One legacy orphan `projects/new/cover/1777533149336-0xv9rym5838d.png` under the shared `new/`
+>   prefix — reconcile-on-save deliberately never touches `new/`, so clear it manually or via a
+>   future age-thresholded sweeper (E).
+> - Optional: prune the 3 merged **remote** branches on GitHub (`admin-auth-hardening`,
+>   `storage-orphan-prevention`, `fix/anon-upsert-upload`).
 
 ## Git state (read-only, verified)
 - Remote `origin` = `github.com/Ymrai/Portfolio` (URL embeds a **valid** token — push works).
