@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { getPortfolioInfo } from "@/lib/supabase/queries";
+import { EmailCopyButton } from "@/components/public/email-copy-button";
 
 const navLinks = [
   { label: "Projects", href: "/" },
@@ -55,15 +56,7 @@ export async function Footer() {
             Copyright {new Date().getFullYear()} by {info?.name ?? "Yael Rosenberg"}
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            {info?.email && (
-              <a
-                href={`mailto:${info.email}`}
-                className="text-base transition-opacity hover:opacity-80"
-                style={{ color: WHITE }}
-              >
-                {info.email}
-              </a>
-            )}
+            {info?.email && <EmailCopyButton email={info.email} />}
             {info?.resume_url && (
               <a
                 href={info.resume_url}
