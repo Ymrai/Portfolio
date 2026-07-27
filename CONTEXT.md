@@ -8,7 +8,7 @@ _Last updated: 2026-07-27_
 - **GitHub:** https://github.com/Ymrai/Portfolio (public)
 - **Live URL:** https://yaelrosenberg.com
 - **Hosting:** Vercel (Hobby / free plan) — auto-deploys on every push to `main`
-- **Domain registrar:** Namecheap (transferred from Wix; expires Nov 26, 2028; auto-renew ON)
+- **Domain registrar:** Cloudflare Registrar (transferred from Namecheap July 27, 2026; at-cost renewal ~$10.46/yr; free WHOIS privacy; expiry extended +1 yr by the transfer)
 
 ## Tech Stack
 Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Framer Motion, Phosphor Icons, Manrope font.
@@ -21,9 +21,10 @@ Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Fra
 ## Infrastructure
 - **Supabase** — database + storage. Bucket `portfolio-assets` with folders: `avatars`, `more-projects`, `projects`, `resumes`.
 - **Vercel** — auto-deploy on push to `main`.
-- **Namecheap DNS → Vercel:**
+- **Cloudflare DNS → Vercel** (nameservers `kip.ns.cloudflare.com` + `raphaela.ns.cloudflare.com`):
   - A record: `@` → `216.198.79.1`
   - CNAME: `www` → `63c4db7eed96f7b9.vercel-dns-017.com`
+  - ⚠️ **Both records MUST stay "DNS only" (grey cloud), never proxied (orange cloud).** Proxying a Vercel origin through Cloudflare causes redirect loops / SSL failures and Vercel marks the domain invalid.
 
 ## Environment Variables (Vercel + local `.env.local`)
 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PORTFOLIO_PASSWORD`, `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL`.
@@ -43,9 +44,10 @@ Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Fra
 
 **Phase 4 — Security:** explicit Supabase API grants added (ready for Oct 30, 2026 change), fixed `getAllProjects()` bug (was anon client instead of service role), fixed `set_updated_at` function search-path vuln, removed broad storage listing policy (`portfolio_assets_public_read`), added explicit deny policy on settings table. Supabase Security Advisor: 0 errors / 0 warnings / 0 suggestions.
 
+**Phase 5 — Domain move to Cloudflare (July 27, 2026):** moved DNS to Cloudflare (Free plan, records kept "DNS only" for Vercel), then transferred the registrar Namecheap → Cloudflare. Nameservers changed at Namecheap to Cloudflare's; domain went Active; unlocked + EPP code at Namecheap; transfer paid ($10.46, +1 yr) and approved to speed up. Site verified live in HTTPS throughout — zero downtime. Note: Cloudflare's proxy/DDoS does NOT apply since records are DNS-only (Vercel provides its own SSL/CDN).
+
 ## Pending / Reminders
-- **July 22, 2026 (PASSED):** 60-day ICANN lock expired. Optional transfer Namecheap → Cloudflare (~$8–10/yr, better DNS mgmt, free DDoS protection). Not required — Namecheap works fine.
 - **Oct 30, 2026:** Supabase enforces explicit grants on all existing projects. Already handled.
 
 ## Domain History
-Originally Wix (builder + registrar). Couldn't transfer Wix → Cloudflare directly (Cloudflare needs an intermediate registrar + 60-day ICANN wait). Solution: Wix → Namecheap (May 2026) → optionally Cloudflare (after July 22, 2026). Current state: domain at Namecheap, site on Vercel, all working.
+Originally Wix (builder + registrar). Couldn't transfer Wix → Cloudflare directly (Cloudflare needs an intermediate registrar + 60-day ICANN wait). Path taken: Wix → Namecheap (May 2026) → Cloudflare (July 27, 2026). Current state: domain registered at Cloudflare, DNS managed by Cloudflare (DNS-only records → Vercel), site hosted on Vercel, all working.
