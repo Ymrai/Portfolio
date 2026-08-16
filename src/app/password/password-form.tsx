@@ -93,9 +93,12 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
             <input type="hidden" name="from" value={from} />
 
             <div
-              // Solid brand border for hover and focus — no gradient here, so the
-              // card's rotating ring stays the only gradient on the page.
-              className="relative mx-auto flex items-center rounded-full bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 hover:border-[#D6009D]/40 focus-within:border-[#D6009D] dark:hover:border-[#FF47C4]/40 dark:focus-within:border-[#FF47C4] transition-colors duration-200 ease-out"
+              // Neutral grey on hover, softened brand on focus. Both colours come
+              // from tokens that already flip per theme (--muted-foreground and
+              // --primary), so no colour needs a dark: variant — but the states
+              // do: `dark:border-white/10` compiles with `:is(.dark *)` and would
+              // otherwise tie on specificity and win by source order.
+              className="relative mx-auto flex items-center rounded-full bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 hover:border-muted-foreground/35 focus-within:border-primary/65 dark:hover:border-muted-foreground/35 dark:focus-within:border-primary transition-colors duration-200 ease-out"
               style={{ maxWidth: "440px" }}
             >
               {/* Colour comes from the class, not the `color` prop — Phosphor
