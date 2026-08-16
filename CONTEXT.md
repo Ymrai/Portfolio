@@ -8,7 +8,7 @@ _Last updated: 2026-07-27_
 - **GitHub:** https://github.com/Ymrai/Portfolio (public)
 - **Live URL:** https://yaelrosenberg.com
 - **Hosting:** Vercel (Hobby / free plan) — auto-deploys on every push to `main`
-- **Domain registrar:** Cloudflare Registrar (transferred from Namecheap July 27, 2026; at-cost renewal ~$10.46/yr; free WHOIS privacy; expiry extended +1 yr by the transfer)
+- **Domain registrar:** Cloudflare Registrar (transfer from Namecheap **completed** July 27, 2026; at-cost renewal ~$10.46/yr; free WHOIS privacy; **expires Nov 26, 2029**; **auto-renew ON**). No longer any billing relationship with Namecheap for this domain.
 
 ## Tech Stack
 Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Framer Motion, Phosphor Icons, Manrope font.
@@ -44,7 +44,7 @@ Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Fra
 
 **Phase 4 — Security:** explicit Supabase API grants added (ready for Oct 30, 2026 change), fixed `getAllProjects()` bug (was anon client instead of service role), fixed `set_updated_at` function search-path vuln, removed broad storage listing policy (`portfolio_assets_public_read`), added explicit deny policy on settings table. Supabase Security Advisor: 0 errors / 0 warnings / 0 suggestions.
 
-**Phase 5 — Domain move to Cloudflare (July 27, 2026):** moved DNS to Cloudflare (Free plan, records kept "DNS only" for Vercel), then transferred the registrar Namecheap → Cloudflare. Nameservers changed at Namecheap to Cloudflare's; domain went Active; unlocked + EPP code at Namecheap; transfer paid ($10.46, +1 yr) and approved to speed up. Site verified live in HTTPS throughout — zero downtime. Note: Cloudflare's proxy/DDoS does NOT apply since records are DNS-only (Vercel provides its own SSL/CDN).
+**Phase 5 — Domain move to Cloudflare (July 27, 2026) — COMPLETED:** moved DNS to Cloudflare (Free plan, records kept "DNS only" for Vercel), then transferred the registrar Namecheap → Cloudflare. Steps: nameservers changed at Namecheap to Cloudflare's (`kip` + `raphaela`.ns.cloudflare.com); domain went Active on Cloudflare; unlocked + retrieved EPP code at Namecheap; transfer paid ($10.46, adds 1 yr) and approved via Namecheap email to speed it up. Transfer confirmed complete (Cloudflare "Domain Transfer Complete" email + Registrations page shows yaelrosenberg.com Active, expires Nov 26 2029, auto-renew ON). Site verified live in HTTPS throughout — zero downtime. Note: Cloudflare's proxy/DDoS does NOT apply since records are DNS-only (Vercel provides its own SSL/CDN). Namecheap dashboard may lag a few hours before dropping the domain — no action needed there, no further Namecheap billing.
 
 ## Pending / Reminders
 - **Oct 30, 2026:** Supabase enforces explicit grants on all existing projects. Already handled.
