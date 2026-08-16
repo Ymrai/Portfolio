@@ -121,7 +121,7 @@ export function MoreProjectForm({ project }: MoreProjectFormProps) {
         <div className="flex gap-2">
           {project && (
             <Button
-              variant="destructive"
+              variant="outline"
               onClick={() => setConfirmDelete(true)}
               disabled={pending}
             >
