@@ -152,7 +152,6 @@ export function ProjectForm({ project }: ProjectFormProps) {
           {project && (
             <Button
               variant="destructive"
-              size="sm"
               onClick={() => setConfirmDelete(true)}
               disabled={pending}
             >
