@@ -303,11 +303,11 @@ export function ProjectForm({ project }: ProjectFormProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Duration</Label>
+              <Label>Year</Label>
               <Input
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                placeholder="6 months"
+                placeholder="2025"
               />
             </div>
           </div>
