@@ -10,7 +10,13 @@ interface PasswordFormProps {
   searchParams: Promise<{ from?: string }>;
 }
 
-const BRAND = "#D6009D";
+/**
+ * Theme-aware brand magenta: #D6009D on light surfaces, #FF47C4 on dark. Both
+ * are documented in globals.css as meeting WCAG AA against their own
+ * background — the light value does not clear AA on the dark page, so brand
+ * text must never hardcode it.
+ */
+const BRAND = "var(--brand-text)";
 
 
 export function PasswordForm({ searchParams }: PasswordFormProps) {
@@ -92,11 +98,13 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
               className="relative mx-auto flex items-center rounded-full bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 hover:border-[#D6009D]/40 focus-within:border-[#D6009D] dark:hover:border-[#FF47C4]/40 dark:focus-within:border-[#FF47C4] transition-colors duration-200 ease-out"
               style={{ maxWidth: "440px" }}
             >
+              {/* Colour comes from the class, not the `color` prop — Phosphor
+                  passes that straight through as an SVG attribute, where a
+                  var() reference does not resolve. */}
               <LockKey
                 size={18}
                 weight="duotone"
-                color={BRAND}
-                className="absolute left-4 shrink-0"
+                className="absolute left-4 shrink-0 text-[var(--brand-text)]"
               />
               <input
                 type="password"
@@ -130,7 +138,9 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
               <p
                 className="mt-3 text-center text-sm font-medium"
                 role="alert"
-                style={{ color: "#e53e3e" }}
+                // --destructive-text flips per theme for the same reason: the
+                // light red does not clear AA on the dark page.
+                style={{ color: "var(--destructive-text)" }}
               >
                 {state.error}
               </p>
