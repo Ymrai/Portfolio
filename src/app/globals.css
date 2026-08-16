@@ -145,3 +145,98 @@
     scroll-behavior: smooth;
   }
 }
+
+/* ── Ambient gradient wash ────────────────────────────────────────────────────
+   The colour fields behind the password page travel the four corners in a slow
+   loop — top-right, bottom-right, bottom-left, top-left — breathing in and out
+   of scale as they go. Registered as Tailwind v4 animation tokens
+   (`animate-wash-*`); there is no tailwind.config.js in this project.
+
+   Three fields share one path at different durations, each started partway
+   through with a negative delay, so they trail each other around the circuit
+   instead of moving as a block.                                               */
+@theme {
+  --animate-wash-a: washOrbit 40s ease-in-out infinite;
+  --animate-wash-b: washOrbit 50s ease-in-out -16s infinite;
+  --animate-wash-c: washOrbit 45s ease-in-out -32s infinite;
+}
+
+/* Offsets are sized for a 70vw x 70vh field. They are pushed well past the
+   viewport edge at each corner so the fields hug the rim of the page and stay
+   off the card in the centre; the scale peaks are kept modest for the same
+   reason — a bigger swell would bleed back over the card. */
+@keyframes washOrbit {
+  0%   { transform: translate(54vw, -32vh) scale(1); }
+  25%  { transform: translate(54vw, 60vh) scale(1.12); }
+  50%  { transform: translate(-26vw, 60vh) scale(1); }
+  75%  { transform: translate(-26vw, -32vh) scale(1.09); }
+  100% { transform: translate(54vw, -32vh) scale(1); }
+}
+
+/* Respect the OS "reduce motion" setting — the wash holds still. */
+@media (prefers-reduced-motion: reduce) {
+  .gradients-container > * {
+    animation: none !important;
+  }
+}
+
+/* ── Brand gradient ring ──────────────────────────────────────────────────────
+   The rotating multi-hue ring around the password card. The stop list lives in
+   a custom property so it can be reused or retuned from one place.
+
+   #731A80 and #FF47C4 are portfolio colours; the warm #FF9A5A is not — it is
+   there to give the sweep somewhere to go, the way the orange does in the
+   monday.com reference. Drop it from --brand-stops to stay strictly on-palette.
+
+   The start angle must be registered with @property: to the browser a plain
+   custom property is a string, and strings cannot be interpolated, so without
+   it the ring would jump between keyframes rather than turn.                  */
+@property --wash-border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes washBorderSpin {
+  to {
+    --wash-border-angle: 360deg;
+  }
+}
+
+:root {
+  --brand-stops: #731A80, #D6009D, #FF47C4, #FF9A5A, #D6009D, #731A80;
+}
+
+/* A conic gradient on a pseudo-element, masked so only its own 2px padding is
+   painted. The naive border-box/padding-box trick only works over an opaque
+   fill — this card is translucent, so the gradient showed straight through it
+   and washed the whole surface pink. */
+.wash-border {
+  position: relative;
+}
+
+.wash-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(from var(--wash-border-angle), var(--brand-stops));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: 2px;
+  opacity: 0.85;
+  animation: washBorderSpin 12s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wash-border::before {
+    animation: none;
+  }
+}
