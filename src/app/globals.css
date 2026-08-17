@@ -180,29 +180,12 @@
   }
 }
 
-/* ── Brand gradient ring ──────────────────────────────────────────────────────
-   The rotating multi-hue ring around the password card. The stop list lives in
-   a custom property so it can be reused or retuned from one place.
+/* ── Brand gradient text ──────────────────────────────────────────────────────
+   The stop list lives in a custom property so it can be retuned from one place.
 
    #731A80 and #FF47C4 are portfolio colours; the warm #FF9A5A is not — it is
    there to give the sweep somewhere to go, the way the orange does in the
-   monday.com reference. Drop it from --brand-stops to stay strictly on-palette.
-
-   The start angle must be registered with @property: to the browser a plain
-   custom property is a string, and strings cannot be interpolated, so without
-   it the ring would jump between keyframes rather than turn.                  */
-@property --wash-border-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes washBorderSpin {
-  to {
-    --wash-border-angle: 360deg;
-  }
-}
-
+   monday.com reference. Drop it from --brand-stops to stay strictly on-palette. */
 :root {
   --brand-stops: #731A80, #D6009D, #FF47C4, #FF9A5A, #D6009D, #731A80;
 }
@@ -213,38 +196,9 @@
   --brand-stops: #C77BE0, #FF47C4, #FFA9DC, #FFB27A, #FF47C4, #C77BE0;
 }
 
-/* A conic gradient on a pseudo-element, masked so only its own 2px padding is
-   painted. The naive border-box/padding-box trick only works over an opaque
-   fill — this card is translucent, so the gradient showed straight through it
-   and washed the whole surface pink. */
-.wash-border {
-  position: relative;
-}
-
-.wash-border::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: conic-gradient(from var(--wash-border-angle), var(--brand-stops));
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  padding: 2px;
-  opacity: 0.85;
-  animation: washBorderSpin 12s linear infinite;
-}
-
-/* Animated gradient text — the same palette as the card ring, but swept
-   horizontally rather than conically: a conic gradient centres on the middle of
-   the word, which leaves one half of the glyphs washed out. The stop list is
-   mirrored end to end so the loop has no visible seam. */
+/* The sweep runs horizontally rather than conically: a conic gradient centres
+   on the middle of the word, which leaves one half of the glyphs washed out.
+   The stop list is mirrored end to end so the loop has no visible seam. */
 @keyframes washTextSlide {
   0%   { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
@@ -260,7 +214,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wash-border::before,
   .wash-text {
     animation: none;
   }
