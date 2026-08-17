@@ -142,7 +142,23 @@ This project uses a **custom ThemeProvider** (`src/components/providers/theme-pr
 
 **Theme storage:** localStorage key `theme` + a cookie also named `theme` (read by `RootLayout` to set the initial `<html class>` on SSR, eliminating flash).
 
-**Brand colour: `#D6009D`** — hardcoded in CSS as `--color-primary` and `--color-brand`. It does NOT change between light/dark. Never swap it for a CSS variable.
+**Brand magenta is theme-aware — do not hardcode it.**
+
+| | Light | Dark |
+|---|---|---|
+| `--primary` / `--brand` / `--brand-text` | `#D6009D` | `#FF47C4` |
+
+The two values are not interchangeable: `#D6009D` measures 4.83:1 on white but only **2.92:1** on the dark page background, below the 4.5:1 AA threshold. `#FF47C4` measures 4.67:1 on dark. Any brand-coloured **text or icon** must therefore read the token, not the hex:
+
+```tsx
+style={{ color: "var(--brand-text)" }}          // ✅ flips per theme
+className="text-[var(--brand-text)]"            // ✅ for icons that inherit currentColor
+style={{ color: "#D6009D" }}                    // ❌ fails AA in dark
+```
+
+Hardcoding `#D6009D` is acceptable only for **surfaces** — a filled button, a tinted background — where the value is paired with an explicit `dark:` variant. Note that Phosphor's `color` prop passes straight through to an SVG attribute, where `var()` does not resolve; colour those icons with a class instead.
+
+Error text follows the same rule via `--destructive-text` (`#B91C1C` light, `#FCA5A5` dark).
 
 **Custom property for secondary body text:**
 - Light: `--secondary-body: #5B5B5B`
@@ -169,7 +185,22 @@ Use `color: "var(--secondary-body)"` for secondary paragraphs, captions, and des
 
 ## Animation conventions
 
-All animations use **Framer Motion**.
+**Framer Motion for anything triggered** — entrances, scroll reveals, page transitions, state changes. **CSS keyframes for anything ambient** — decorative motion that simply runs.
+
+The split is not stylistic. Framer Motion drives transforms from `requestAnimationFrame`, which the browser suspends whenever the page is hidden; a long ambient loop then freezes and resumes out of phase. CSS animations are handed to the compositor and keep their own timeline. Ambient keyframes live in `globals.css` — there is no `tailwind.config.js` in this project — and are registered as Tailwind v4 tokens:
+
+```css
+@theme { --animate-wash-a: washOrbit 40s ease-in-out infinite; }
+@keyframes washOrbit { /* … */ }
+```
+
+Every ambient animation must be silenced under reduced motion:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .gradients-container > *, .wash-text { animation: none; }
+}
+```
 
 ### Scroll-reveal: `FadeIn` (individual), `FadeInGroup` + `FadeInItem` (staggered list)
 
@@ -194,6 +225,29 @@ import { FadeIn } from "@/components/public/fade-in";
 
 ### Easing
 Standard easing: `[0.22, 1, 0.36, 1]` (custom spring-like ease). Always define as `const ease = [...] as const` to satisfy TypeScript's `Easing` type.
+
+### Ambient background: `GradientWash`
+
+`src/components/public/gradient-wash.tsx` — three blurred colour fields orbiting the four corners of the viewport, plus a film grain that stops wide gradients from banding. Drop it into any full-bleed page as the first child of a `relative` container:
+
+```tsx
+<div className="relative min-h-screen overflow-hidden">
+  <GradientWash />
+  <div className="relative z-10">{/* content */}</div>
+</div>
+```
+
+Colours come from CSS custom properties set on the wrapper with `dark:` variants, so the palette swaps without a JS theme check and without a hydration mismatch. Currently used only by `/password`.
+
+### Brand gradient: `--brand-stops` + `.wash-text`
+
+`--brand-stops` (globals.css) is the shared multi-hue ramp — violet → magenta → pink → warm. `.wash-text` clips it to glyphs for animated gradient type:
+
+```tsx
+<span className="wash-text inline-block">experience.</span>
+```
+
+Two things to know. The sweep is **linear, not conic**: a conic gradient centres on the middle of the word and leaves half the glyphs washed out. And `.dark` overrides `--brand-stops` with a lifted set — the `#731A80` end of the light ramp sinks into the dark page and the letters it lands on stop reading.
 
 ---
 
@@ -252,6 +306,14 @@ Toast feedback is driven by `useEffect` watching `state.success` / `state.error`
 ---
 
 ## Key gotchas
+
+0. **Turbopack serves stale CSS when you add new Tailwind classes.** A newly used utility (`focus-within:border-primary/65`, `md:translate-y-[26px]`) can be present in the HTML but missing from the compiled stylesheet, so the change silently does nothing. Editing the file again does not help. Stop the dev server, then clear the cache, then restart — in that order; deleting `.next` while the server is running takes it down with an Internal Server Error:
+
+   ```bash
+   rm -rf .next
+   ```
+
+   To confirm a rule actually shipped rather than trusting the browser, fetch the served stylesheet: `curl -sS http://localhost:3000/password | grep -oE '/_next/static/[^"]*\.css'`, then grep that file.
 
 1. **Middleware is not supported** with Turbopack (`next dev`). Auth lives in Server Component layouts, not `middleware.ts`.
 
