@@ -207,6 +207,12 @@
   --brand-stops: #731A80, #D6009D, #FF47C4, #FF9A5A, #D6009D, #731A80;
 }
 
+/* On the dark page the deep violet end of the ramp sinks into the background
+   and the glyphs it lands on stop reading, so dark mode uses a lifted set. */
+.dark {
+  --brand-stops: #C77BE0, #FF47C4, #FFA9DC, #FFB27A, #FF47C4, #C77BE0;
+}
+
 /* A conic gradient on a pseudo-element, masked so only its own 2px padding is
    painted. The naive border-box/padding-box trick only works over an opaque
    fill — this card is translucent, so the gradient showed straight through it
@@ -235,8 +241,27 @@
   animation: washBorderSpin 12s linear infinite;
 }
 
+/* Animated gradient text — the same palette as the card ring, but swept
+   horizontally rather than conically: a conic gradient centres on the middle of
+   the word, which leaves one half of the glyphs washed out. The stop list is
+   mirrored end to end so the loop has no visible seam. */
+@keyframes washTextSlide {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.wash-text {
+  background-image: linear-gradient(90deg, var(--brand-stops));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: washTextSlide 9s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .wash-border::before {
+  .wash-border::before,
+  .wash-text {
     animation: none;
   }
 }

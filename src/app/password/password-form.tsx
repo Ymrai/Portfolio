@@ -40,56 +40,61 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
         </span>
       </div>
 
-      {/* Centered card */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-20">
+      {/* Two-column split — copy on the left, form on the right */}
+      <div className="relative z-10 flex-1 flex items-center justify-center px-6 py-24">
         <motion.div
-          initial={{ opacity: 0, y: 12, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          // `wash-border` (globals.css) draws the rotating gradient ring on a
-          // masked ::before, so the card keeps its own translucent fill here.
-          className="w-full rounded-[32px] bg-white/45 dark:bg-white/[0.05] wash-border p-8"
-          style={{
-            maxWidth: "504px",
-            backdropFilter: "blur(28px) saturate(180%)",
-            WebkitBackdropFilter: "blur(28px) saturate(180%)",
-            boxShadow: "0 14px 44px -26px rgba(214,0,157,0.14), 0 3px 12px -8px rgba(0,0,0,0.05)",
-          }}
+          // Columns are sized to their contents, not split in half: with equal
+          // halves the copy filled 472px of a 488px column and the form 440px of
+          // the other, so the gap the eye saw was 128px rather than the 64px set
+          // here. A fixed 440px form column closes that dead space.
+          className="w-full grid gap-12 md:gap-16 md:grid-cols-[1fr_440px] md:items-center"
+          style={{ maxWidth: "1000px" }}
         >
-          {/* Eyebrow */}
-          <p
-            className="text-center"
-            style={{
-              fontSize: "clamp(11px, 2.6vw, 13px)",
-              letterSpacing: "0.14em",
-              color: BRAND,
-              fontWeight: 600,
-              textTransform: "uppercase",
-            }}
-          >
-            Yael Rosenberg <span style={{ fontSize: "16px" }}>·</span> Product Designer
-          </p>
+          {/* ── Left: copy ── */}
+          <div>
+            <p
+              style={{
+                fontSize: "clamp(11px, 2.6vw, 13px)",
+                letterSpacing: "0.14em",
+                color: BRAND,
+                fontWeight: 600,
+                textTransform: "uppercase",
+              }}
+            >
+              Yael Rosenberg <span style={{ fontSize: "16px" }}>·</span> Product Designer
+            </p>
 
-          {/* Headline */}
-          <h1
-            className="mt-6 text-center font-bold text-foreground"
-            style={{ fontSize: "clamp(24px, 6vw, 32px)", lineHeight: 1.2, letterSpacing: "-0.02em" }}
-          >
-            Complex products.
-            <br />
-            Clear <span style={{ color: BRAND }}>experiences.</span>
-          </h1>
+            <h1
+              className="mt-6 font-bold text-foreground"
+              style={{
+                fontSize: "clamp(32px, 5.2vw, 52px)",
+                lineHeight: 1.08,
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Enter the password.
+              <br />
+              Step into the{" "}
+              {/* `wash-text` clips the rotating brand gradient to the glyphs.
+                  inline-block keeps the gradient box tight to the word. */}
+              <span className="wash-text inline-block">experience.</span>
+            </h1>
+          </div>
 
-          {/* Subtitle */}
-          <p
-            className="mt-4 text-center text-muted-foreground"
-            style={{ fontSize: "14px" }}
+          {/* ── Right: form ── */}
+          {/* Nudged down 26px on wide screens: the grid centres the two columns
+              against each other, but the left column is three lines of display
+              type against two quiet controls, so its optical centre sits lower
+              than its geometric one. Transform rather than margin, so the shift
+              does not feed back into the grid's own centring. */}
+          <form
+            action={action}
+            className="w-full md:justify-self-end md:translate-y-[26px]"
+            style={{ maxWidth: "440px" }}
           >
-            Enter the password to see how
-          </p>
-
-          {/* Form */}
-          <form action={action} className="mt-9">
             <input type="hidden" name="from" value={from} />
 
             <div
@@ -98,8 +103,7 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
               // --primary), so no colour needs a dark: variant — but the states
               // do: `dark:border-white/10` compiles with `:is(.dark *)` and would
               // otherwise tie on specificity and win by source order.
-              className="relative mx-auto flex items-center rounded-full bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 hover:border-muted-foreground/35 focus-within:border-primary/65 dark:hover:border-muted-foreground/35 dark:focus-within:border-primary transition-colors duration-200 ease-out"
-              style={{ maxWidth: "440px" }}
+              className="relative flex items-center rounded-full bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 hover:border-muted-foreground/35 focus-within:border-primary/65 dark:hover:border-muted-foreground/35 dark:focus-within:border-primary transition-colors duration-200 ease-out"
             >
               {/* Colour comes from the class, not the `color` prop — Phosphor
                   passes that straight through as an SVG attribute, where a
@@ -107,39 +111,24 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
               <LockKey
                 size={18}
                 weight="duotone"
-                className="absolute left-4 shrink-0 text-[var(--brand-text)]"
+                className="absolute left-5 shrink-0 text-[var(--brand-text)]"
               />
               <input
                 type="password"
                 name="password"
-                placeholder="Enter password"
+                placeholder="Password"
                 aria-label="Password"
                 autoComplete="current-password"
                 autoFocus
                 required
                 className="w-full bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
-                style={{ height: "48px", fontSize: "14px", paddingLeft: "44px", paddingRight: "52px" }}
+                style={{ height: "52px", fontSize: "14px", paddingLeft: "48px", paddingRight: "20px" }}
               />
-              <button
-                type="submit"
-                disabled={pending}
-                aria-label="Submit password"
-                // Colour lives in classes, not inline style, so the hover and
-                // active states can actually override it.
-                // Brand magenta per theme — #D6009D light, #FF47C4 dark, matching
-                // --primary in globals.css. Colour lives in classes, not inline
-                // style, so hover and active can override it. Tailwind v4 emits
-                // `scale-*` as the standalone `scale` property, not `transform`.
-                className="absolute right-1.5 flex items-center justify-center rounded-full text-white bg-[#D6009D] hover:bg-[#B00480] active:bg-[#96006E] dark:bg-[#FF47C4] dark:hover:bg-[#FF6FD2] dark:active:bg-[#E62FA9] hover:scale-105 active:scale-100 disabled:opacity-60 disabled:hover:bg-[#D6009D] dark:disabled:hover:bg-[#FF47C4] disabled:hover:scale-100 transition-[background-color,scale] duration-200 ease-out"
-                style={{ height: "36px", width: "36px" }}
-              >
-                <ArrowRight size={18} weight="bold" />
-              </button>
             </div>
 
             {state?.error && (
               <p
-                className="mt-3 text-center text-sm font-medium"
+                className="mt-3 text-sm font-medium"
                 role="alert"
                 // --destructive-text flips per theme for the same reason: the
                 // light red does not clear AA on the dark page.
@@ -148,6 +137,24 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
                 {state.error}
               </p>
             )}
+
+            <button
+              type="submit"
+              disabled={pending}
+              // Brand magenta per theme — #D6009D light, #FF47C4 dark, matching
+              // --primary in globals.css. Colour lives in classes, not inline
+              // style, so hover and active can override it. Tailwind v4 emits
+              // `scale-*` as the standalone `scale` property, not `transform`.
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-full font-semibold text-white bg-[#D6009D] hover:bg-[#B00480] active:bg-[#96006E] dark:bg-[#FF47C4] dark:hover:bg-[#FF6FD2] dark:active:bg-[#E62FA9] disabled:opacity-60 disabled:hover:bg-[#D6009D] dark:disabled:hover:bg-[#FF47C4] transition-colors duration-200 ease-out"
+              // paddingTop nudges the label 1px down. It measures dead-centred \u2014
+              // ink centre is 0.1px off the button centre \u2014 but "Continue" has no
+              // descenders, so the empty descender space below the baseline reads
+              // as extra room and the label looks high. Optical, not geometric.
+              style={{ height: "52px", fontSize: "15px", paddingTop: "2px" }}
+            >
+              {pending ? "Checking\u2026" : "Continue"}
+              {!pending && <ArrowRight size={18} weight="bold" />}
+            </button>
           </form>
         </motion.div>
       </div>
