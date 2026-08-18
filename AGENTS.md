@@ -202,6 +202,16 @@ Every ambient animation must be silenced under reduced motion:
 }
 ```
 
+⚠️ **Never gate content on a Framer Motion entrance.** `initial={{ opacity: 0 }}` is rendered into the SSR markup, so the element ships invisible and only appears once the script has run. If the bundle fails, is blocked, or is merely slow on a phone, the user is left staring at whatever sits *outside* the wrapper. This shipped on `/password`: the logo and background rendered while the login form itself stayed at `opacity:0`, making the site impossible to enter.
+
+Use a CSS entrance for anything the page cannot function without — `rise-in` in `globals.css` is the fade-and-lift used there, and needs nothing but the stylesheet:
+
+```tsx
+<div className="rise-in">{/* form, copy, anything load-bearing */}</div>
+```
+
+Framer Motion entrances are still fine for decorative or below-the-fold content. To check, curl the route and search the markup for `opacity:0` — anything load-bearing should not appear.
+
 ### Scroll-reveal: `FadeIn` (individual), `FadeInGroup` + `FadeInItem` (staggered list)
 
 `FadeIn` — use this for **individual sections and detail page content**:
