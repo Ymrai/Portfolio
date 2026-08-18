@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useActionState } from "react";
-import { motion } from "framer-motion";
 import { ArrowRight, LockKey } from "@phosphor-icons/react";
 import { checkPassword } from "@/app/actions/auth-password";
 import { GradientWash } from "@/components/public/gradient-wash";
@@ -30,8 +29,9 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
     >
       <GradientWash />
 
-      {/* Fixed logo — top-left */}
-      <div className="fixed top-6 left-8 z-20">
+      {/* Fixed logo — top-left, sharing the content's own gutter so the two
+          line up on the left edge */}
+      <div className="fixed top-6 left-6 md:left-8 z-20">
         <span
           className="font-extrabold tracking-tight select-none"
           style={{ fontSize: "22px", color: BRAND }}
@@ -41,16 +41,17 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
       </div>
 
       {/* Two-column split — copy on the left, form on the right */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-6 py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      <div className="relative z-10 flex-1 flex items-center justify-center px-6 py-16 md:py-24">
+        <div
           // Columns are sized to their contents, not split in half: with equal
           // halves the copy filled 472px of a 488px column and the form 440px of
           // the other, so the gap the eye saw was 128px rather than the 64px set
           // here. A fixed 440px form column closes that dead space.
-          className="w-full grid gap-12 md:gap-16 md:grid-cols-[1fr_440px] md:items-center"
+          //
+          // `rise-in` (globals.css) is the entrance. It is CSS rather than Framer
+          // Motion on purpose: a JS-driven entrance ships this block at opacity:0,
+          // so any script failure leaves the login form invisible.
+          className="rise-in w-full grid gap-9 md:gap-16 md:grid-cols-[1fr_440px] md:items-center"
           style={{ maxWidth: "1000px" }}
         >
           {/* ── Left: copy ── */}
@@ -121,8 +122,12 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
                 autoComplete="current-password"
                 autoFocus
                 required
-                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
-                style={{ height: "52px", fontSize: "14px", paddingLeft: "48px", paddingRight: "20px" }}
+                // 16px below md, 14px above. iOS Safari zooms the whole page in
+                // when a focused input is under 16px, which throws the layout
+                // sideways and off-screen — the size has to change, not the
+                // viewport meta, since user-scalable=no breaks pinch-to-zoom.
+                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-base md:text-sm"
+                style={{ height: "52px", paddingLeft: "48px", paddingRight: "20px" }}
               />
             </div>
 
@@ -156,7 +161,7 @@ export function PasswordForm({ searchParams }: PasswordFormProps) {
               {!pending && <ArrowRight size={18} weight="bold" />}
             </button>
           </form>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
