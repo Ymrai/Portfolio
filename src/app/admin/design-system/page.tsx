@@ -81,6 +81,44 @@ function SpacingRow({ label, value, usage }: SpacingRowProps) {
   );
 }
 
+interface MotionRowProps {
+  token: string;
+  ms: string;
+  usage: string;
+}
+
+function MotionRow({ token, ms, usage }: MotionRowProps) {
+  return (
+    <div className="flex items-center gap-4 py-2 border-b border-border last:border-0">
+      <span className="font-mono text-sm w-36 shrink-0">{token}</span>
+      <span className="font-mono text-xs text-muted-foreground w-16 shrink-0">{ms}</span>
+      <span className="text-sm text-muted-foreground">{usage}</span>
+    </div>
+  );
+}
+
+/* Live preview of the shared card hover. Production drives the lift with
+   Framer Motion (`whileHover={{ y: -4 }}`); this reproduces the same values in
+   pure CSS so the page stays a Server Component. Same 4px, same 300ms, same
+   easing — hover it to feel what a card should do. */
+function CardHoverPreview() {
+  return (
+    <div className="group w-full max-w-[260px] rounded-2xl overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-lg hover:-translate-y-1">
+      <div className="relative h-28 overflow-hidden bg-muted">
+        <div className="absolute inset-4 flex items-center justify-center rounded-lg bg-primary/15 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]">
+          <span className="text-xs text-muted-foreground">thumbnail</span>
+        </div>
+      </div>
+      <div className="px-4 py-3">
+        <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--brand-text)" }}>
+          Hover me
+        </p>
+        <p className="text-sm font-semibold leading-snug">Card hover preview</p>
+      </div>
+    </div>
+  );
+}
+
 export default async function DesignSystemPage() {
   await requireAdminPage();
   return (
@@ -88,7 +126,7 @@ export default async function DesignSystemPage() {
       <div>
         <h1 className="text-2xl font-bold">Design System</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Read-only reference for colors, typography, and spacing used across the site.
+          Read-only reference for colors, typography, spacing, and motion used across the site.
         </p>
       </div>
 
@@ -181,6 +219,67 @@ export default async function DesignSystemPage() {
       </section>
 
       {/* ── Dark Mode Behavior ── */}
+      {/* ── Motion ── */}
+      <section className="space-y-6">
+        <h2 className="text-lg font-semibold border-b border-border pb-2">Motion</h2>
+
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Easing</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">Standard</p>
+              <p className="text-muted-foreground font-mono">[0.22, 1, 0.36, 1]</p>
+              <p className="text-muted-foreground">Every scroll reveal and card hover. Declare as <span className="font-mono">const ease = [...] as const</span> so TypeScript accepts it as an Easing.</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">easeInOut</p>
+              <p className="text-muted-foreground font-mono">&quot;easeInOut&quot;</p>
+              <p className="text-muted-foreground">Only the page transition and the looping scroll arrow — motion with no start or end to accent.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Durations in use</h3>
+          <div className="mt-1">
+            <MotionRow token="duration-200" ms="200ms" usage="Colour and border changes — links, buttons, inputs. The default for a small state change." />
+            <MotionRow token="duration-300" ms="300ms" usage="Card shadow on hover" />
+            <MotionRow token="duration-500" ms="500ms" usage="Thumbnail zoom on card hover" />
+            <MotionRow token="duration: 0.25" ms="250ms" usage="Page transition opacity fade (PageTransition)" />
+            <MotionRow token="duration: 0.3" ms="300ms" usage="Card hover lift — ProjectCard and MoreProjectCard" />
+            <MotionRow token="duration: 0.65" ms="650ms" usage="FadeInItem — one child of a staggered list" />
+            <MotionRow token="duration: 0.7" ms="700ms" usage="FadeIn — a single section revealing on scroll" />
+            <MotionRow token="duration: 1.6" ms="1600ms" usage="Scroll arrow bounce, repeats forever" />
+            <MotionRow token="staggerChildren" ms="120ms" usage="Gap between FadeInGroup children" />
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            Bare numbers are Framer Motion (seconds); <span className="font-mono">duration-*</span> are Tailwind classes. Framer Motion drives anything triggered — entrances, hovers, page changes. Ambient loops belong in CSS keyframes, because <span className="font-mono">requestAnimationFrame</span> is suspended while a tab is hidden and a long loop resumes out of phase.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Card hover</h3>
+          <div className="flex flex-col sm:flex-row gap-6 sm:items-start">
+            <CardHoverPreview />
+            <div className="text-sm space-y-2 flex-1">
+              <p className="text-muted-foreground">Both <span className="font-mono">ProjectCard</span> and <span className="font-mono">MoreProjectCard</span> use one recipe. Match it for any new card:</p>
+              <ul className="text-muted-foreground space-y-1 list-disc pl-4">
+                <li>Lift <span className="font-mono">y: -4</span> over <span className="font-mono">0.3s</span></li>
+                <li><span className="font-mono">hover:shadow-lg</span> over <span className="font-mono">300ms</span> — not <span className="font-mono">xl</span>, which is roughly double the offset and blur and overpowers a 4px lift</li>
+                <li>Thumbnail <span className="font-mono">group-hover:scale-[1.03]</span> over <span className="font-mono">500ms</span></li>
+              </ul>
+              <p className="text-muted-foreground">The <span className="font-mono">group</span> class goes on the same element as <span className="font-mono">whileHover</span>, so the lift and the zoom fire together.</p>
+            </div>
+          </div>
+
+          <div className="border border-border rounded-lg p-4 mt-4 text-sm space-y-1">
+            <p className="font-semibold">The two cards differ on purpose — do not unify these</p>
+            <p className="text-muted-foreground">Radius <span className="font-mono">rounded-2xl</span> vs <span className="font-mono">rounded-xl</span> and border <span className="font-mono">/60</span> vs <span className="font-mono">/50</span>: ProjectCard is a full-width 500px split layout, MoreProjectCard is a grid tile, so the larger radius only reads correctly on the larger card.</p>
+            <p className="text-muted-foreground">Clickable area: only MoreProjectCard wraps the whole card in a Link. On a case study card just the &ldquo;View case study&rdquo; button is clickable, so the card body correctly shows no pointer cursor.</p>
+          </div>
+        </div>
+      </section>
+
       <section className="space-y-4">
         <h2 className="text-lg font-semibold border-b border-border pb-2">Dark Mode Behavior</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
