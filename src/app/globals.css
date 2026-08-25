@@ -2,6 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Tailwind v4 auto-detects sources across the whole project, Markdown included.
+   Class names quoted in AGENTS.md / CONTEXT.md were being emitted as real CSS
+   (a `shadow-xl` mentioned in prose shipped a dead rule to production). Docs
+   never supply runtime classes here — CMS copy comes from Supabase and
+   renderInline only produces <strong> — so exclude them. */
+@source not "../../**/*.md";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
