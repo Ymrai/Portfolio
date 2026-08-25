@@ -138,6 +138,14 @@ const supabase = await createServiceClient();
 
 ## Theming
 
+> ⚠️ **Dark mode is currently switched off site-wide.** `DARK_MODE_ENABLED` in `src/lib/theme-config.ts` is `false`, which hides the theme toggle on both the public site and the admin and renders every visitor in light. Everything below still applies and is still maintained — the `.dark` palette, the `dark:` variants and `ThemeToggle` are all in place, they simply never activate. Set the flag to `true` to bring it all back.
+>
+> The flag is read in three places, and all three are needed: `app/layout.tsx` (SSR ignores the `theme` cookie), `theme-provider.tsx` (a stored preference does not resolve, and `setTheme` is inert), and the two toggle render sites. Hiding the toggle alone would strand anyone who had already chosen dark, since the preference lives in their browser.
+>
+> **Stored preferences are ignored, never cleared.** Turning the flag back on returns each visitor to the choice they had, rather than resetting everyone — so do not "tidy up" by deleting the cookie or the localStorage key.
+>
+> **Keep writing `dark:` variants for new work.** They cost nothing while the flag is off and are what makes the switch back a one-word change rather than a re-theming project.
+
 This project uses a **custom ThemeProvider** (`src/components/providers/theme-provider.tsx`), not `next-themes`. It exposes the same API as next-themes (`useTheme`, `resolvedTheme`, `setTheme`) so components are interchangeable.
 
 **Theme storage:** localStorage key `theme` + a cookie also named `theme` (read by `RootLayout` to set the initial `<html class>` on SSR, eliminating flash).

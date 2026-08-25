@@ -1,6 +1,6 @@
 # Portfolio Project — Context / Meminder
 
-_Last updated: 2026-08-17_
+_Last updated: 2026-08-25_
 
 ## Project Info
 - **Name:** Yael Rosenberg Portfolio
@@ -14,11 +14,13 @@ _Last updated: 2026-08-17_
 Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Framer Motion, Phosphor Icons, Manrope font.
 
 ## What's Built
-**Public site:** password protection (cookie-based auth, password in Supabase `settings` table), animated hero homepage, case studies grid, dynamic case study pages, More Projects page, About Me page, footer with contact links, dark/light mode toggle, mobile responsive, Framer Motion animations, custom pink circle favicon (`#D6009D`).
+**Public site:** password protection (cookie-based auth, password in Supabase `settings` table), animated hero homepage, case studies grid, dynamic case study pages, More Projects page, About Me page, footer with contact links, mobile responsive, Framer Motion animations, custom pink circle favicon (`#D6009D`).
 
 **Password page (redesigned Aug 17, 2026):** two-column split — copy on the left with "experience." in animated brand gradient, form on the right. Sits on `GradientWash`, an ambient background of colour fields orbiting the viewport corners. See the animation section of AGENTS.md for the reusable pieces.
 
-⚠️ **The password page has no theme toggle** — it sits outside the `(public)` layout, so it follows whatever is in `localStorage.theme`, defaulting to the OS setting. Preferences are per-origin, so switching to light on the live site does not carry over to `localhost:3000`.
+⚠️ **The password page has no theme toggle of its own** — it sits outside the `(public)` layout. Moot while the site is light-only (below), but if dark mode is ever switched back on it will follow whatever is in `localStorage.theme`, defaulting to the OS setting, with no control on the page to change it. Preferences are per-origin, so switching to light on the live site does not carry over to `localhost:3000`.
+
+**Light mode only (since Aug 25, 2026):** the dark/light toggle is hidden on both the public site and the admin, and every visitor renders light — including anyone who had previously chosen dark. Nothing was deleted: flip `DARK_MODE_ENABLED` in `src/lib/theme-config.ts` back to `true` and the toggle, the dark palette and each visitor's saved preference all return.
 
 **Admin CMS at `/admin`:** dashboard, projects manager, more-projects manager, About Me editor, portfolio info editor, settings (password, cookie duration), design system, login page.
 
