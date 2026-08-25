@@ -21,8 +21,8 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-2xl overflow-hidden border border-border/60 bg-card shadow-sm hover:shadow-xl transition-shadow duration-300"
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="group rounded-2xl overflow-hidden border border-border/60 bg-card shadow-sm hover:shadow-lg transition-shadow duration-300"
     >
       <div className="flex flex-col md:flex-row md:h-[500px]">
 
@@ -35,6 +35,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
             <img
               src={project.image_url}
               alt={project.title}
+              className="transition-transform duration-500 group-hover:scale-[1.03]"
               style={{
                 position: "absolute",
                 top: "24px",
