@@ -43,6 +43,8 @@ Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Fra
 - Local URLs: `http://localhost:3000` (public), `http://localhost:3000/admin` (admin).
 - For Supabase SQL changes: run in Supabase Dashboard → SQL Editor.
 
+**⚠️ Tailwind compiles class names out of prose (found Aug 25, 2026).** Tailwind v4 scans the whole project and cannot tell prose from markup, so a utility name written in a sentence ships a real CSS rule. It bit us twice in one session: documenting the card hover recipe in AGENTS.md put `shadow-xl` back into the bundle a commit after it left the code, and the phrase "double the offset and blur" in JSX copy emitted a `.blur{}` rule. Markdown is now excluded via `@source not` in `globals.css`; TSX cannot be, so avoid leaving a bare utility word standing alone in UI copy. The practical cost is not the few hundred bytes — it is that "the class is absent from the compiled CSS" stops being evidence that nothing uses it. **The full rule, the word list and the reliable way to verify a build live in the CSS section of AGENTS.md.**
+
 ## Completed Phases
 **Phase 1 — Build:** full Next.js portfolio from scratch, admin CMS with full CRUD, Supabase DB + storage, password protection, all public pages.
 
