@@ -22,6 +22,8 @@ Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Fra
 
 **Light mode only (since Aug 25, 2026):** the dark/light toggle is hidden on both the public site and the admin, and every visitor renders light — including anyone who had previously chosen dark. Nothing was deleted: flip `DARK_MODE_ENABLED` in `src/lib/theme-config.ts` back to `true` and the toggle, the dark palette and each visitor's saved preference all return.
 
+**Project card hover (aligned Aug 25, 2026):** the case study cards on the homepage (`ProjectCard`) and the tiles on More Projects (`MoreProjectCard`) now share one hover feel — a `y: -4` lift over `0.3s`, `hover:shadow-lg`, and a `group-hover:scale-[1.03]` thumbnail zoom over `500ms`. Four differences are deliberate and should not be "tidied up": border radius (`rounded-2xl` vs `rounded-xl`) and border opacity (`/60` vs `/50`) differ because the two cards are very different sizes, and only the More Projects tile is a `Link` as a whole — on a case study card just the "View case study" button is clickable, so it also carries no pointer cursor.
+
 **Admin CMS at `/admin`:** dashboard, projects manager, more-projects manager, About Me editor, portfolio info editor, settings (password, cookie duration), design system, login page.
 
 ## Infrastructure

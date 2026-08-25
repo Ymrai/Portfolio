@@ -244,6 +244,23 @@ import { FadeIn } from "@/components/public/fade-in";
 ### Easing
 Standard easing: `[0.22, 1, 0.36, 1]` (custom spring-like ease). Always define as `const ease = [...] as const` to satisfy TypeScript's `Easing` type.
 
+### Card hover — one shared recipe
+
+`ProjectCard` (homepage case studies) and `MoreProjectCard` (More Projects grid) use the same hover treatment. Match it for any new card:
+
+```tsx
+<motion.div
+  whileHover={{ y: -4 }}
+  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+  className="group ... hover:shadow-lg transition-shadow duration-300"
+>
+  <img className="transition-transform duration-500 group-hover:scale-[1.03]" ... />
+```
+
+The `group` class must sit on the same element as `whileHover` so the lift and the thumbnail zoom fire together. `shadow-lg` rather than `shadow-xl` — `xl` is roughly double the offset and blur, which overpowers a 4 px lift.
+
+⚠️ **Four differences between the two cards are deliberate — do not unify them.** Border radius (`rounded-2xl` vs `rounded-xl`) and border opacity (`/60` vs `/50`) differ because the cards are very different sizes: `ProjectCard` is a full-width 500 px split layout, `MoreProjectCard` is a grid tile. And only `MoreProjectCard` wraps the whole card in a `Link` — on a case study card just the "View case study" button is clickable, so it correctly has no pointer cursor over the card body. A request to "make the project cards consistent" means lift, shadow and thumbnail only.
+
 ### Ambient background: `GradientWash`
 
 `src/components/public/gradient-wash.tsx` — three blurred colour fields orbiting the four corners of the viewport, plus a film grain that stops wide gradients from banding. Drop it into any full-bleed page as the first child of a `relative` container:
