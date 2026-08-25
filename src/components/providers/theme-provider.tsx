@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { DARK_MODE_ENABLED } from "@/lib/theme-config";
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type Theme = "light" | "dark" | "system";
@@ -95,10 +97,21 @@ export function ThemeProvider({
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>("light");
 
-  const resolvedTheme: ResolvedTheme =
-    theme === "system" ? systemTheme : (theme as ResolvedTheme);
+  const resolvedTheme: ResolvedTheme = !DARK_MODE_ENABLED
+    ? "light"
+    : theme === "system"
+      ? systemTheme
+      : (theme as ResolvedTheme);
 
   useEffect(() => {
+    // Dark mode is switched off site-wide: pin light and leave every stored
+    // preference untouched, so turning the flag back on restores each visitor's
+    // own choice rather than resetting everyone.
+    if (!DARK_MODE_ENABLED) {
+      applyTheme("light");
+      return;
+    }
+
     // Read system preference and stored preference on mount.
     const sys = getSystemTheme();
     setSystemTheme(sys);
@@ -130,6 +143,10 @@ export function ThemeProvider({
   }, [storageKey, defaultTheme]);
 
   function setTheme(newTheme: Theme) {
+    // Inert while dark mode is switched off. Nothing renders a control that
+    // calls this, but a stray caller must not be able to slip past the flag.
+    if (!DARK_MODE_ENABLED) return;
+
     const resolved: ResolvedTheme =
       newTheme === "system" ? systemTheme : (newTheme as ResolvedTheme);
     setThemeState(newTheme);

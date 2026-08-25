@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { DARK_MODE_ENABLED } from "@/lib/theme-config";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -26,8 +27,12 @@ export default async function RootLayout({
   const themeCookie = cookieStore.get("theme")?.value;
   // "system" means the client hasn't resolved it yet; treat as "light" on the
   // server. The ThemeProvider corrects the class on mount if needed.
+  //
+  // With DARK_MODE_ENABLED off the cookie is ignored rather than cleared, so a
+  // returning visitor who once chose dark renders light — and gets their old
+  // preference back untouched if the flag is ever turned on again.
   const htmlClass =
-    themeCookie === "dark"
+    DARK_MODE_ENABLED && themeCookie === "dark"
       ? `${manrope.variable} h-full antialiased dark`
       : `${manrope.variable} h-full antialiased`;
 

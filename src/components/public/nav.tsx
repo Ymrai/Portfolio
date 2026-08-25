@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
+import { DARK_MODE_ENABLED } from "@/lib/theme-config";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -60,7 +61,8 @@ export function Nav() {
               </a>
             );
           })}
-          <ThemeToggle />
+          {/* Hidden, not removed — see DARK_MODE_ENABLED in lib/theme-config.ts */}
+          {DARK_MODE_ENABLED && <ThemeToggle />}
         </nav>
       </div>
     </header>
