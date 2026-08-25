@@ -189,6 +189,23 @@ Use `color: "var(--secondary-body)"` for secondary paragraphs, captions, and des
 - Body text font size: **18 px** (`style={{ fontSize: "18px" }}`). Do not use `text-xl` (20 px) for body copy.
 - Section labels: `font-semibold uppercase tracking-widest` at 16 px.
 
+### ⚠️ Tailwind reads prose, not just code
+
+Tailwind v4 auto-detects sources across the whole project, and its extractor does not know prose from markup. **A utility name written in a sentence compiles to a real CSS rule.** This has shipped dead CSS twice:
+
+- Documenting the card hover recipe in this file put `shadow-xl` back into the production bundle one commit after it was deleted from the code.
+- The sentence *"double the offset and blur"* in JSX copy on the design system page emitted a `.blur{}` rule. It now reads "softness".
+
+Markdown is handled structurally — `globals.css` carries `@source not "../../**/*.md"`, so docs can quote class names freely. **TSX cannot be excluded**, so when writing UI copy avoid leaving a bare utility word standing alone: `blur`, `border`, `shadow`, `transition`, `grid`, `flex`, `container`, `truncate`, `italic`, `underline`. Reword (`softness`), or wrap the name in `<span className="font-mono">` markup where it is genuinely a class reference.
+
+The cost is a few hundred bytes, so this is not urgent — but it quietly breaks a useful check. "The class is absent from the compiled CSS" stops being evidence that nothing uses it. To verify a change really shipped, diff the built selector set against a build of the previous commit:
+
+```bash
+rm -rf .next && npm run build   # then compare selector sets between builds
+```
+
+Extracting selectors by splitting on `}` gives false positives for rules inside `@media (hover: hover)`, because rule order shifts between builds. Confirm any surprise with a direct `grep -F` of the build output before acting on it.
+
 ---
 
 ## Animation conventions
