@@ -265,7 +265,7 @@ export default async function DesignSystemPage() {
               <p className="text-muted-foreground">Both <span className="font-mono">ProjectCard</span> and <span className="font-mono">MoreProjectCard</span> use one recipe. Match it for any new card:</p>
               <ul className="text-muted-foreground space-y-1 list-disc pl-4">
                 <li>Lift <span className="font-mono">y: -4</span> over <span className="font-mono">0.3s</span></li>
-                <li><span className="font-mono">hover:shadow-lg</span> over <span className="font-mono">300ms</span> — not <span className="font-mono">xl</span>, which is roughly double the offset and blur and overpowers a 4px lift</li>
+                <li><span className="font-mono">hover:shadow-lg</span> over <span className="font-mono">300ms</span> — not <span className="font-mono">xl</span>, which is roughly double the offset and softness and overpowers a 4px lift</li>
                 <li>Thumbnail <span className="font-mono">group-hover:scale-[1.03]</span> over <span className="font-mono">500ms</span></li>
               </ul>
               <p className="text-muted-foreground">The <span className="font-mono">group</span> class goes on the same element as <span className="font-mono">whileHover</span>, so the lift and the zoom fire together.</p>
