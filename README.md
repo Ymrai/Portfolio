@@ -53,7 +53,6 @@ src/
 │
 ├── components/
 │   ├── public/                # All public-facing UI components
-│   │   ├── hero.tsx           # Homepage hero section
 │   │   ├── project-card.tsx   # Case study card (alternating image/text layout)
 │   │   ├── nav.tsx            # Fixed top navigation bar
 │   │   ├── footer.tsx         # Footer with links
