@@ -333,13 +333,13 @@ export default async function DesignSystemPage() {
           </div>
           <div className="border border-border rounded-lg p-4 space-y-1">
             <p className="font-semibold">Footer accent border</p>
-            <p className="text-muted-foreground">height: 8px, backgroundColor: #D6009D</p>
+            <p className="text-muted-foreground">height: 8px, backgroundColor: <span className="font-mono">var(--primary)</span> — the token, not a hard-coded hex, so it follows the theme</p>
             <p className="text-muted-foreground">Bottom edge of the footer</p>
           </div>
           <div className="border border-border rounded-lg p-4 space-y-1">
             <p className="font-semibold">More Projects card — dot separator</p>
             <p className="text-muted-foreground font-mono">{"{ · }"} between title and kind</p>
-            <p className="text-muted-foreground">fontSize: 2rem, fontWeight: 900, color: #D6009D, lineHeight: 0.8</p>
+            <p className="text-muted-foreground">fontSize: 2rem, fontWeight: 900, lineHeight: 0.8, color: <span className="font-mono">var(--brand-text)</span> — it is a glyph, so it takes the text token</p>
             <p className="text-muted-foreground">No extra margin — spacing from character padding only</p>
           </div>
           <div className="border border-border rounded-lg p-4 space-y-1">
@@ -352,7 +352,8 @@ export default async function DesignSystemPage() {
             <p className="font-semibold">Bold text in content blocks</p>
             <p className="text-muted-foreground">Write <span className="font-mono">**text**</span> in any text block or description field</p>
             <p className="text-muted-foreground">renderInline() parses it to <span className="font-mono">{"<strong className='font-bold'>"}</span></p>
-            <p className="text-muted-foreground">Applied to: text block paragraphs &amp; bullets, More Project description, dynamic section subtitles</p>
+            <p className="text-muted-foreground">Applied to: dynamic-section paragraphs and bullets (so both detail page types), and the More Project description</p>
+            <p className="text-muted-foreground">⚠️ NOT parsed in section subtitles or in the legacy CaseStudySection — <span className="font-mono">**text**</span> renders literally there</p>
           </div>
         </div>
       </section>
