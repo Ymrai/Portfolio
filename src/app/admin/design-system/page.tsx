@@ -311,49 +311,103 @@ export default async function DesignSystemPage() {
       </section>
 
       {/* ── Components ── */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold border-b border-border pb-2">Key Component Styles</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <div className="border border-border rounded-lg p-4 space-y-1">
-            <p className="font-semibold">Accent bar</p>
-            <p className="text-muted-foreground">w-10 h-[3px] bg-primary rounded-full</p>
-            <p className="text-muted-foreground">Appears above every section title</p>
+      <section className="space-y-6">
+        <h2 className="text-lg font-semibold border-b border-border pb-2">Components</h2>
+        <p className="text-sm text-muted-foreground">
+          The public site is built almost entirely from its own components in <span className="font-mono">components/public</span>, not from shadcn primitives — those live in the admin. Every value below was read from the code.
+        </p>
+
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Cards</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">ProjectCard — homepage case studies</p>
+              <p className="text-muted-foreground">Full-width split, <span className="font-mono">md:h-[500px]</span>. Image and text columns swap sides on alternating indexes via md:order-*; on mobile the image is always on top.</p>
+              <p className="text-muted-foreground">Image column background comes from the DB (<span className="font-mono">card_bg_color</span>), image inset 24px and object-contain</p>
+              <p className="text-muted-foreground">Only the pill button is a link — the card body is not clickable</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">MoreProjectCard — More Projects grid</p>
+              <p className="text-muted-foreground">Grid tile, <span className="font-mono">aspect-[4/3]</span> cover image, object-cover</p>
+              <p className="text-muted-foreground">The whole tile is a Link, so it carries a pointer cursor</p>
+              <p className="text-muted-foreground">Dot separator between title and kind: fontSize 2rem, fontWeight 900, lineHeight 0.8, color <span className="font-mono">var(--brand-text)</span> — it is a glyph, so it takes the text token. No extra margin; spacing comes from the character padding.</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1 sm:col-span-2">
+              <p className="font-semibold">Shared hover, and four deliberate differences</p>
+              <p className="text-muted-foreground">Both cards lift <span className="font-mono">y: -4</span> over 0.3s, take <span className="font-mono">hover:shadow-lg</span>, and zoom the thumbnail <span className="font-mono">group-hover:scale-[1.03]</span> over 500ms — see the Motion section for the recipe.</p>
+              <p className="text-muted-foreground">⚠️ Radius (<span className="font-mono">rounded-2xl</span> vs <span className="font-mono">rounded-xl</span>), border opacity (/60 vs /50), clickable area and cursor differ on purpose. Do not unify them.</p>
+            </div>
           </div>
-          <div className="border border-border rounded-lg p-4 space-y-1">
-            <p className="font-semibold">Pill button (View case study)</p>
-            <p className="text-muted-foreground">border border-primary <span className="font-mono">text-brand-text</span> rounded-full text-sm font-medium — the border is a surface, the label is brand text</p>
-            <p className="text-muted-foreground">Hover: hover:bg-primary hover:text-primary-foreground, transition-all duration-200</p>
-            <p className="text-muted-foreground">Sizing is not uniform: px-5 py-2 on the case study card and both detail pages, px-6 py-2.5 on About</p>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Page chrome</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">Accent bar</p>
+              <p className="text-muted-foreground">w-10 h-[3px] bg-primary rounded-full mb-4</p>
+              <p className="text-muted-foreground">Sits above every section title — homepage, About and More Projects</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">Pill button (View case study)</p>
+              <p className="text-muted-foreground">border border-primary <span className="font-mono">text-brand-text</span> rounded-full text-sm font-medium — the border is a surface, the label is brand text</p>
+              <p className="text-muted-foreground">Hover: hover:bg-primary hover:text-primary-foreground, transition-all duration-200</p>
+              <p className="text-muted-foreground">Sizing is not uniform: px-5 py-2 on the case study card and both detail pages, px-6 py-2.5 on About</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">Nav (fixed header)</p>
+              <p className="text-muted-foreground">h-20 inner row, bg-background/90, backdrop-blur-md, border-b border-border/30</p>
+              <p className="text-muted-foreground">Links are 16px. Active: <span className="font-mono">text-brand-text</span> — not text-primary, which fails AA on the dark page background</p>
+              <p className="text-muted-foreground">Inactive: #757575 light / #A0A8BC dark, hover returns to foreground</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">Footer</p>
+              <p className="text-muted-foreground">Always dark, regardless of theme</p>
+              <p className="text-muted-foreground">Bottom accent bar: height 8px, backgroundColor <span className="font-mono">var(--primary)</span> — the token, not a hard-coded hex, so it follows the theme</p>
+              <p className="text-muted-foreground">EmailCopyButton copies to the clipboard and swaps its icon to a check; its colour is a literal #FFFFFF because the footer is always dark</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">ScrollArrow — homepage only</p>
+              <p className="text-muted-foreground">Bounces <span className="font-mono">y: [0, 8, 0]</span> over 1.6s, repeating forever, coloured var(--primary)</p>
+              <p className="text-muted-foreground">Scrolls to its target minus 112px, which clears the 80px header plus breathing room</p>
+              <p className="text-muted-foreground">⚠️ It is an ambient loop running on Framer Motion. AGENTS.md asks for CSS keyframes here, because requestAnimationFrame is suspended while a tab is hidden and a long loop resumes out of phase.</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">More Projects — page navigation</p>
+              <p className="text-muted-foreground">Looping prev / next at the bottom of a detail page</p>
+              <p className="text-muted-foreground">getAdjacentMoreProjects wraps: last→first, first→last</p>
+              <p className="text-muted-foreground">ScrollToTopButton sits centred between the two nav links — a pill with border-border/60, muted until hover</p>
+            </div>
           </div>
-          <div className="border border-border rounded-lg p-4 space-y-1">
-            <p className="font-semibold">Nav (fixed header)</p>
-            <p className="text-muted-foreground">h-20 inner row, bg-background/90, backdrop-blur-md, border-b border-border/30</p>
-            <p className="text-muted-foreground">Links are 16px. Active: <span className="font-mono">text-brand-text</span> — not text-primary, which fails AA on the dark page background</p>
-            <p className="text-muted-foreground">Inactive: #757575 light / #A0A8BC dark, hover returns to foreground</p>
-          </div>
-          <div className="border border-border rounded-lg p-4 space-y-1">
-            <p className="font-semibold">Footer accent border</p>
-            <p className="text-muted-foreground">height: 8px, backgroundColor: <span className="font-mono">var(--primary)</span> — the token, not a hard-coded hex, so it follows the theme</p>
-            <p className="text-muted-foreground">Bottom edge of the footer</p>
-          </div>
-          <div className="border border-border rounded-lg p-4 space-y-1">
-            <p className="font-semibold">More Projects card — dot separator</p>
-            <p className="text-muted-foreground font-mono">{"{ · }"} between title and kind</p>
-            <p className="text-muted-foreground">fontSize: 2rem, fontWeight: 900, lineHeight: 0.8, color: <span className="font-mono">var(--brand-text)</span> — it is a glyph, so it takes the text token</p>
-            <p className="text-muted-foreground">No extra margin — spacing from character padding only</p>
-          </div>
-          <div className="border border-border rounded-lg p-4 space-y-1">
-            <p className="font-semibold">More Projects — page navigation</p>
-            <p className="text-muted-foreground">Looping prev / next at bottom of detail page</p>
-            <p className="text-muted-foreground">getAdjacentMoreProjects wraps: last→first, first→last</p>
-            <p className="text-muted-foreground">ScrollToTopButton centered between nav links</p>
-          </div>
-          <div className="border border-border rounded-lg p-4 space-y-1 sm:col-span-2">
-            <p className="font-semibold">Bold text in content blocks</p>
-            <p className="text-muted-foreground">Write <span className="font-mono">**text**</span> in any text block or description field</p>
-            <p className="text-muted-foreground">renderInline() parses it to <span className="font-mono">{"<strong className='font-bold'>"}</span></p>
-            <p className="text-muted-foreground">Applied to: dynamic-section paragraphs, bullets and subtitles (so both detail page types), and the More Project description</p>
-            <p className="text-muted-foreground">⚠️ NOT parsed in section captions, section titles, or the legacy CaseStudySection — <span className="font-mono">**text**</span> renders literally there</p>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Content</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div className="border border-border rounded-lg p-4 space-y-1 sm:col-span-2">
+              <p className="font-semibold">Bold text in content blocks</p>
+              <p className="text-muted-foreground">Write <span className="font-mono">**text**</span> in any text block or description field</p>
+              <p className="text-muted-foreground">renderInline() parses it to <span className="font-mono">{"<strong className='font-bold'>"}</span></p>
+              <p className="text-muted-foreground">Applied to: dynamic-section paragraphs, bullets and subtitles (so both detail page types), and the More Project description</p>
+              <p className="text-muted-foreground">⚠️ NOT parsed in section captions, section titles, or the legacy CaseStudySection — <span className="font-mono">**text**</span> renders literally there</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">SnapshotTable</p>
+              <p className="text-muted-foreground">Label / value rows, hairline rules top and bottom of each row</p>
+              <p className="text-muted-foreground">Reads the theme in JS, not CSS: values are #757575 light and #A0A8BC dark, rules are black or white at 15%</p>
+              <p className="text-muted-foreground">Labels are text-sm on mobile and md:text-xl, min-width 100px</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1">
+              <p className="font-semibold">ImageGallery</p>
+              <p className="text-muted-foreground">Square thumbnails in a 2 / 3 / 4-column responsive grid, gap-3</p>
+              <p className="text-muted-foreground">Thumbnails scale to hover:scale-105 over 300ms, with cursor-zoom-in</p>
+              <p className="text-muted-foreground">Opens a Dialog lightbox on bg-black/95</p>
+            </div>
+            <div className="border border-border rounded-lg p-4 space-y-1 sm:col-span-2">
+              <p className="font-semibold">SectionSlider</p>
+              <p className="text-muted-foreground">Embla carousel inside a dynamic section, width <span className="font-mono">min(calc(100vw - 48px), 1232px)</span> so it can bleed past the text column</p>
+              <p className="text-muted-foreground">Slides are rounded-xl, dim slightly on hover, and are keyboard-focusable with a visible ring</p>
+            </div>
           </div>
         </div>
       </section>
