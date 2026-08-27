@@ -345,7 +345,7 @@ export function SectionsEditor({ value, onChange, projectId }: SectionsEditorPro
               <Input
                 value={section.subtitle ?? ""}
                 onChange={(e) => updateSectionSubtitle(sIdx, e.target.value)}
-                placeholder="Subtitle (optional)…"
+                placeholder="Subtitle (optional) — **bold** works…"
                 className="h-7 text-xs bg-transparent border-0 shadow-none px-0 focus-visible:ring-0 text-muted-foreground"
               />
             </div>

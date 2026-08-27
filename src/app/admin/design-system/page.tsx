@@ -352,8 +352,8 @@ export default async function DesignSystemPage() {
             <p className="font-semibold">Bold text in content blocks</p>
             <p className="text-muted-foreground">Write <span className="font-mono">**text**</span> in any text block or description field</p>
             <p className="text-muted-foreground">renderInline() parses it to <span className="font-mono">{"<strong className='font-bold'>"}</span></p>
-            <p className="text-muted-foreground">Applied to: dynamic-section paragraphs and bullets (so both detail page types), and the More Project description</p>
-            <p className="text-muted-foreground">⚠️ NOT parsed in section subtitles or in the legacy CaseStudySection — <span className="font-mono">**text**</span> renders literally there</p>
+            <p className="text-muted-foreground">Applied to: dynamic-section paragraphs, bullets and subtitles (so both detail page types), and the More Project description</p>
+            <p className="text-muted-foreground">⚠️ NOT parsed in section captions, section titles, or the legacy CaseStudySection — <span className="font-mono">**text**</span> renders literally there</p>
           </div>
         </div>
       </section>

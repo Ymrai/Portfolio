@@ -111,7 +111,7 @@ export function DynamicSectionRenderer({ section }: DynamicSectionProps) {
               className="leading-snug"
               style={{ fontSize: "18px", color: "var(--secondary-body)" }}
             >
-              {section.subtitle}
+              {renderInline(section.subtitle)}
             </p>
           )}
         </div>
