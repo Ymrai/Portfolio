@@ -321,12 +321,15 @@ export default async function DesignSystemPage() {
           </div>
           <div className="border border-border rounded-lg p-4 space-y-1">
             <p className="font-semibold">Pill button (View case study)</p>
-            <p className="text-muted-foreground">border border-primary text-primary rounded-full px-6 py-2.5 text-sm</p>
+            <p className="text-muted-foreground">border border-primary <span className="font-mono">text-brand-text</span> rounded-full text-sm font-medium — the border is a surface, the label is brand text</p>
+            <p className="text-muted-foreground">Hover: hover:bg-primary hover:text-primary-foreground, transition-all duration-200</p>
+            <p className="text-muted-foreground">Sizing is not uniform: px-5 py-2 on the case study card and both detail pages, px-6 py-2.5 on About</p>
           </div>
           <div className="border border-border rounded-lg p-4 space-y-1">
             <p className="font-semibold">Nav (fixed header)</p>
-            <p className="text-muted-foreground">h-16, bg-background/90, backdrop-blur-md</p>
-            <p className="text-muted-foreground">Active: text-primary. Inactive: text-foreground/55</p>
+            <p className="text-muted-foreground">h-20 inner row, bg-background/90, backdrop-blur-md, border-b border-border/30</p>
+            <p className="text-muted-foreground">Links are 16px. Active: <span className="font-mono">text-brand-text</span> — not text-primary, which fails AA on the dark page background</p>
+            <p className="text-muted-foreground">Inactive: #757575 light / #A0A8BC dark, hover returns to foreground</p>
           </div>
           <div className="border border-border rounded-lg p-4 space-y-1">
             <p className="font-semibold">Footer accent border</p>
