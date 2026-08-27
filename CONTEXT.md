@@ -1,6 +1,6 @@
 # Portfolio Project — Context / Meminder
 
-_Last updated: 2026-08-25_
+_Last updated: 2026-08-27_
 
 ## Project Info
 - **Name:** Yael Rosenberg Portfolio
@@ -23,6 +23,10 @@ Next.js, TypeScript, Tailwind CSS, shadcn/ui, Supabase (database + storage), Fra
 **Light mode only (since Aug 25, 2026):** the dark/light toggle is hidden on both the public site and the admin, and every visitor renders light — including anyone who had previously chosen dark. Nothing was deleted: flip `DARK_MODE_ENABLED` in `src/lib/theme-config.ts` back to `true` and the toggle, the dark palette and each visitor's saved preference all return.
 
 **Project card hover (aligned Aug 25, 2026):** the case study cards on the homepage (`ProjectCard`) and the tiles on More Projects (`MoreProjectCard`) now share one hover feel — a `y: -4` lift over `0.3s`, `hover:shadow-lg`, and a `group-hover:scale-[1.03]` thumbnail zoom over `500ms`. Four differences are deliberate and should not be "tidied up": border radius (`rounded-2xl` vs `rounded-xl`) and border opacity (`/60` vs `/50`) differ because the two cards are very different sizes, and only the More Projects tile is a `Link` as a whole — on a case study card just the "View case study" button is clickable, so it also carries no pointer cursor.
+
+**Design system page — Components section (Aug 27, 2026):** `/admin/design-system` documents the site's own components in 13 cards across Cards / Page chrome / Content, replacing the older text-only "Key Component Styles". shadcn primitives were deliberately left out — they are an admin concern. All seven of the old cards were audited against the code first and **five were wrong**, so treat the Colors, Typography, Spacing and Dark Mode Behavior sections as unverified until someone checks them the same way.
+
+**Cleanup (Aug 27, 2026):** four components nothing imported were deleted — `public/hero.tsx` plus the `dropdown-menu`, `scroll-area` and `sheet` primitives — and `**bold**` now parses in dynamic-section subtitles, which the docs had already been claiming.
 
 **Admin CMS at `/admin`:** dashboard, projects manager, more-projects manager, About Me editor, portfolio info editor, settings (password, cookie duration), design system, login page.
 

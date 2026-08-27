@@ -345,7 +345,19 @@ Toast feedback is driven by `useEffect` watching `state.success` / `state.error`
 
 ## Inline markdown
 
-`renderInline(text)` in `src/lib/render-inline.tsx` converts `**bold**` to `<strong>`. Works in both Server and Client Components. Use it anywhere CMS text is rendered that may contain bold markup.
+`renderInline(text)` in `src/lib/render-inline.tsx` converts `**bold**` to `<strong className="font-bold">`. Works in both Server and Client Components.
+
+It is **not** applied everywhere CMS text appears, and the difference is invisible until someone types `**bold**` and gets literal asterisks on the live site. Where it runs today:
+
+| Field | Parsed |
+|---|---|
+| Dynamic-section paragraphs and bullets | ✅ |
+| Dynamic-section `subtitle` | ✅ |
+| More Project `description` | ✅ |
+| Dynamic-section `caption` and `title` | ❌ |
+| Legacy `CaseStudySection` | ❌ |
+
+Adding a field to the ✅ list means three edits, not one: call `renderInline` at the render site, hint it in the matching `SectionsEditor` placeholder so content authors can discover it, and update the Components section of the design system page, which states this list.
 
 ---
 
